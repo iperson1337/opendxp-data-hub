@@ -69,7 +69,7 @@ class OpenDxpDataHubBundle extends AbstractOpenDxpBundle implements OpenDxpBundl
 
     protected function getComposerPackageName(): string
     {
-        return 'iperson1337/data-hub';
+        return 'iperson1337/opendxp-data-hub';
     }
 
     public function getCssPaths(): array
