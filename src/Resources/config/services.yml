@@ -1,0 +1,32 @@
+imports:
+    - { resource: graphql.yml }
+    - { resource: eventlistener.yml }
+
+services:
+
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    # auto-register all commands as services
+    OpenDxp\Bundle\DataHubBundle\Command\:
+        resource: '../../Command'
+
+    OpenDxp\Bundle\DataHubBundle\Controller\:
+        resource: '../../Controller'
+        public: true
+        autowire: true
+        autoconfigure: true
+        tags: ['controller.service_arguments']
+
+    OpenDxp\Bundle\DataHubBundle\Service\:
+        resource: '../../Service'
+        public: true
+        autowire: true
+        autoconfigure: true
+
+    OpenDxp\Bundle\DataHubBundle\Installer:
+        public: true
+        arguments:
+            $bundle: "@=service('kernel').getBundle('OpenDxpDataHubBundle')"

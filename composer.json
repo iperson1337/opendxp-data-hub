@@ -1,0 +1,53 @@
+{
+    "name": "iperson1337/opendxp-data-hub",
+    "license": "GPL-3.0+",
+    "type": "opendxp-bundle",
+    "description": "OpenDXP Datahub",
+    "config": {
+        "sort-packages": true,
+        "preferred-install": {
+            "open-dxp/opendxp": "source",
+            "*": "dist"
+        },
+        "allow-plugins": {
+            "symfony/runtime": true
+        }
+    },
+    "require": {
+        "php": "~8.3.0 || ~8.4.0 || ~8.5.0",
+        "open-dxp/admin-bundle": "^1.0",
+        "open-dxp/opendxp": "^1.1",
+        "webonyx/graphql-php": "^15.2.3"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^9.6",
+        "symfony/phpunit-bridge": "^6",
+        "codeception/codeception": "^5.3.5",
+        "codeception/phpunit-wrapper": "^9",
+        "codeception/module-asserts": "^3.2",
+        "codeception/module-symfony": "^3.8",
+        "symfony/dotenv": "^7.3",
+        "symfony/runtime": "^7.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "OpenDxp\\Bundle\\DataHubBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OpenDxp\\Bundle\\DataHubBundle\\Tests\\": "tests"
+        },
+        "files": [
+            "kernel/Kernel.php"
+        ]
+    },
+    "extra": {
+        "opendxp": {
+            "bundles": [
+                "OpenDxp\\Bundle\\DataHubBundle\\OpenDxpDataHubBundle"
+            ]
+        }
+    }
+}

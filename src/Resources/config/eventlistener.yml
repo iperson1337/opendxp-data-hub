@@ -1,0 +1,16 @@
+services:
+
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    OpenDxp\Bundle\DataHubBundle\EventListener\DataChangeListener:
+        tags:
+            - { name: kernel.event_subscriber }
+
+    OpenDxp\Bundle\DataHubBundle\EventListener\AdminListener:
+        bind:
+            $config: '%opendxp_data_hub%'
+        tags:
+            - { name: kernel.event_listener, event: opendxp.admin.indexAction.settings, method: addIndexSettings }

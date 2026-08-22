@@ -1,0 +1,42 @@
+.opendxp_main_nav_icon_mind_map {
+    background: url(/bundles/opendxpadmin/img/flat-white-icons/mind_map.svg) center center no-repeat;
+}
+
+.plugin_opendxp_datahub_icon  {
+    background: url(/bundles/opendxpadmin/img/twemoji/2728.svg) center center no-repeat !important;
+}
+
+.plugin_opendxp_datahub_nav_icon {
+    background: url(/bundles/opendxpadmin/img/flat-color-icons/mind_map.svg) center center no-repeat;
+}
+
+.opendxp_version_6 .plugin_opendxp_datahub_nav_icon,
+.opendxp_version_10 .plugin_opendxp_datahub_nav_icon {
+    background: url(/bundles/opendxpadmin/img/flat-white-icons/mind_map.svg) center center no-repeat;
+}
+
+.plugin_opendxp_datahub_icon_graphql {
+    background: url(/bundles/opendxpdatahub/img/graphql.svg) center center no-repeat !important;
+}
+
+.plugin_opendxp_datahub_icon_alias {
+    background: url(/bundles/opendxpadmin/img/flat-color-icons/alphabetical_sorting_az.svg) center center no-repeat !important;
+}
+
+.plugin_opendxp_datahub_icon_locked {
+    background: url(/bundles/opendxpadmin/img/twemoji/1f510.svg) center center no-repeat !important;
+}
+
+.plugin_opendxp_datahub_icon_ifempty {
+    background: url(/bundles/opendxpadmin/img/flat-color-icons/disclaimer.svg) center center no-repeat !important;
+}
+
+.plugin_opendxp_datahub_icon_localecollector {
+    background: url(/bundles/opendxpadmin/img/flat-color-icons/translation.svg) center center no-repeat !important;
+}
+
+#plugin_opendxp_datahub_icon_toolbar {
+    background-image: url(/bundles/opendxpadmin/img/twemoji/2728.svg) !important;
+    filter: grayscale(0%) !important;
+    -webkit-filter: grayscale(0%) !important;
+}

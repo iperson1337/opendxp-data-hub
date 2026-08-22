@@ -1,0 +1,1248 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  # asset
+  opendxp.datahub.graphql.assettype._asset_folder: '@OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetFolderType'
+  opendxp.datahub.graphql.assettype.asset_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetInputType'
+  opendxp.datahub.graphql.assettype.asset_tree: '@OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetTreeType'
+
+
+ # document
+  opendxp.datahub.graphql.documenttype.document: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentType'
+  opendxp.datahub.graphql.documenttype.document_tree: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentTreeType'
+  opendxp.datahub.graphql.documenttype.document_element: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentElementType'
+  opendxp.datahub.graphql.documenttype.document_email: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\EmailType'
+  opendxp.datahub.graphql.documenttype.document_hardlink: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\HardlinkType'
+  opendxp.datahub.graphql.documenttype.document_link: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\LinkType'
+  opendxp.datahub.graphql.documenttype.document_link_datatype: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\LinkDataType'
+  opendxp.datahub.graphql.documenttype.document_areablock_datatype: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\AreablockDataType'
+  opendxp.datahub.graphql.documenttype.document_scheduledblock_datatype: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\ScheduledblockDataType'
+  opendxp.datahub.graphql.documenttype.document_areablock_input_datatype: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\AreablockDataInputType'
+  opendxp.datahub.graphql.documenttype.document_scheduledblock_input_datatype: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\ScheduledblockDataInputType'
+  opendxp.datahub.graphql.documenttype.document_link_inputtype: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentLinkInputType'
+
+
+  opendxp.datahub.graphql.documenttype.document_page: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\PageType'
+  opendxp.datahub.graphql.documenttype.document_snippet: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\SnippetType'
+  opendxp.datahub.graphql.documenttype._document_folder: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentFolderType'
+
+  opendxp.datahub.graphql.documenttype.document_page_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentPageInputType'
+
+ # data object
+  opendxp.datahub.graphql.dataobjecttype.image_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\InputType\ImageInputType'
+  opendxp.datahub.graphql.dataobjecttype.elementdescriptor_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ElementDescriptorInputType'
+  opendxp.datahub.graphql.dataobjecttype.geopoint_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\GeopointInputType'
+  opendxp.datahub.graphql.dataobjecttype.quantity_value_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\QuantityValueInputType'
+  opendxp.datahub.graphql.dataobjecttype.input_quantity_value_input: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\InputQuantityValueInputType'
+
+  opendxp.datahub.graphql.dataobjecttype.object: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\OpenDxpObjectType'
+  opendxp.datahub.graphql.dataobjecttype.object_tree: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ObjectTreeType'
+  opendxp.datahub.graphql.dataobjecttype._object_folder: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ObjectFolderType'
+  opendxp.datahub.graphql.dataobjecttype.asset_metadata_manytoone: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\HrefType'
+
+ # helpers
+  opendxp.datahub.graphql.fieldhelper.asset: '@OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\AssetFieldHelper'
+  opendxp.datahub.graphql.fieldhelper.document: '@OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\DocumentFieldHelper'
+  opendxp.datahub.graphql.fieldhelper.object: '@OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\DataObjectFieldHelper'
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\Service:
+    public: true
+
+  # Field helper
+  OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\DataObjectFieldHelper:
+    public: false
+    calls:
+      - [setGraphQlService, ['@OpenDxp\Bundle\DataHubBundle\GraphQL\Service']]
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\AssetFieldHelper:
+    public: false
+    calls:
+      - [setGraphQlService, ['@OpenDxp\Bundle\DataHubBundle\GraphQL\Service']]
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\DocumentFieldHelper:
+    public: false
+    calls:
+      - [setGraphQlService, ['@OpenDxp\Bundle\DataHubBundle\GraphQL\Service']]
+
+
+  #
+  # other stuff
+  #
+  opendxp.datahub.graphql.generaltype.factory.anytargettype:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\General\AnyTargetType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: anytarget }
+
+  opendxp.datahub.graphql.generaltype.factory.document_tree:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentTreeType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: document_tree }
+
+
+  opendxp.datahub.graphql.generaltype.factory.object:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\OpenDxpObjectType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: object }
+
+  opendxp.datahub.graphql.generaltype.factory.object_tree:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ObjectTreeType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: object_tree }
+
+  opendxp.datahub.graphql.generaltype.factory.asset_tree:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+     $className: OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetTreeType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: asset_tree }
+
+  opendxp.datahub.graphql.generaltype.factory.hotspotmarkertype:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\SharedType\HotspotMarkerType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: hotspotmarker }
+
+  opendxp.datahub.graphql.generaltype.factory.hotspothotspottype:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\SharedType\HotspotHotspotType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: hotspothotspot }
+
+  opendxp.datahub.graphql.generaltype.factory.hotspot_metadata:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\HotspotMetadataType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: hotspot_metadata }
+
+  opendxp.datahub.graphql.generaltype.factory.element_property_property:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\ElementPropertyType
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: element_property }
+
+  opendxp.datahub.graphql.generaltype.factory.element_tag:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\ElementTag
+    tags:
+      - { name: opendxp.datahub.graphql.generaltype_factory, id: element_tag }
+
+
+  opendxp.datahub.graphql.generaltype.factory.document_translation:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+      arguments:
+          $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentTranslationType
+      tags:
+          - { name: opendxp.datahub.graphql.generaltype_factory, id: document_translation }
+
+  opendxp.datahub.graphql.generaltype.factory.asset:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetType
+    tags:
+      - { name: opendxp.datahub.graphql.assettype_factory, id: asset }
+
+  opendxp.datahub.graphql.generaltype.factory.asset_metadataitem:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetMetadataItem
+    tags:
+      - { name: opendxp.datahub.graphql.assettype_factory, id: asset_metadataitem }
+
+  opendxp.datahub.graphql.generaltype.factory.asset_embeddedmetainfoitem:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+      arguments:
+          $className: OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetEmbeddedMetaInfoItem
+      tags:
+          - { name: opendxp.datahub.graphql.assettype_factory, id: asset_embeddedmetainfoitem }
+
+  opendxp.datahub.graphql.generaltype.factory.video:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\VideoType
+    tags:
+      - { name: opendxp.datahub.graphql.assettype_factory, id: video }
+
+  opendxp.datahub.graphql.generaltype.factory.translation:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\GeneralTypeFactory
+      arguments:
+          $className: OpenDxp\Bundle\DataHubBundle\GraphQL\TranslationType\TranslationType
+      tags:
+          - { name: opendxp.datahub.graphql.translationtype_factory, id: translation }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\General\AnyDocumentTargetType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\ImageDataType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\LinkDataType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\AreablockDataType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\ScheduledblockDataType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\AreablockDataInputType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\ScheduledblockDataInputType: ~
+
+  #
+  # built-in document-elements query datatypes type generator
+  #
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_areablock:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Areablock
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_areablock }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_block:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Block
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_block }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_checkbox:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Checkbox
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_checkbox }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_date:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Date
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_date }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_embed:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Embed
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_embed }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_input:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Input
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_input }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_image:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Image
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_image }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_link:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Link
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_link }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_multiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Multiselect
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_multiselect }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_numeric:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Numeric
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_numeric }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_pdf:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Pdf
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_pdf }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_relation:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Relation
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_relation }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_relations:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Relations
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_relations }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_renderlet:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Renderlet
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_renderlet }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_scheduledblock:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Scheduledblock
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_scheduledblock }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_select:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Select
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_select }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_table:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Table
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_table }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_textarea:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Textarea
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_textarea }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_wysiwyg:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Wysiwyg
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_wysiwyg }
+
+  opendxp.datahub.graphql.documentelementquerytypegenerator_datatype_video:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementQueryFieldConfigGenerator\Video
+    tags:
+      - { name: opendxp.datahub.graphql.documentelementquerytypegenerator, id: typegenerator_documentelementquerydatatype_video }
+
+  #
+  # built-in dataobject query datatypes type generator
+  #
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_checkbox:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Checkbox
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_booleanSelect }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_checkbox }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_newsletterActive }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_newsletterConfirmed }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_classificationstore:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Classificationstore
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_classificationstore }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_date:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_date }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_datetime:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Datetime
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_datetime }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_email:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Input
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_email }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_href:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Href
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_href }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_manyToOneRelation }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_fieldcollections:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_fieldcollections }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_firstname:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Input
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_firstname }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_geobounds:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Geobounds
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_geobounds }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_geopolygon:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Geopolygon
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_geopolygon }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_geopoint:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Geopoint
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_geopoint }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_hotspotimage:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Hotspotimage
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_hotspotimage }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_image:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Image
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_image }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_imageGallery:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\ImageGallery
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_imageGallery }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_link:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Link
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_link }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_input:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Input
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_externalImage }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_input }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_rgbaColor }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_time }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_calculatedvalue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\CalculatedValue
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_calculatedValue }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_lastname:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Input
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_lastname }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_multihref:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Multihref
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_multihref }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_manyToManyRelation }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_objects:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Objects
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_manyToManyObjectRelation }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_reverseManyToManyObjectRelation:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\ReverseManyToManyObjectRelation
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_reverseManyToManyObjectRelation } # deprecated since 6.9, removed in 10
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_reverseObjectRelation }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_multihrefMetadata:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\MultihrefMetadata
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_multihrefMetadata }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_advancedManyToManyRelation }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_objectsMetadata:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\ObjectsMetadata
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_advancedManyToManyObjectRelation }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_multiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Multiselect
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_languagemultiselect }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_multiselect }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_countrymultiselect }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_numeric:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Numeric
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_numeric }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_quantityvalue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\QuantityValue
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_quantityValue }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_inputquantityvalue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\InputQuantityValue
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_inputQuantityValue }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_select:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Select
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_country }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_gender }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_language }
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_select }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_slider:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Slider
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_slider }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_textarea:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_textarea }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_urlSlug:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\UrlSlug
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_urlSlug }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_video:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Video
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_video }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_wysiwyg:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_wysiwyg }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_table:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Table
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_table }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_structuredTable:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\StructuredTable
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_structuredTable }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_datatype_block:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Block
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_dataobjectquerydatatype_block }
+
+  #
+  # type generators for dataobject query operators
+  #
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_alias:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\Alias
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_alias }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_concatenator:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\Concatenator
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_concatenator }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_dateformatter:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\DateFormatter
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_dateformatter }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_elementcounter:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\ElementCounter
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_elementcounter }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_merge:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\Merge
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_merge }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_substring:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\Substring
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_substring }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_text:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\StringBase
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_text }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_thumbnail:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\Thumbnail
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_thumbnail }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_thumbnailhtml:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\ThumbnailHtml
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_thumbnailhtml }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_translatevalue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\TranslateValue
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_translatevalue }
+
+  opendxp.datahub.graphql.dataobjectquerytypegenerator_operator_trimmer:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryOperatorConfigGenerator\Trimmer
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectquerytypegenerator, id: typegenerator_queryoperator_trimmer }
+
+
+  #
+  # dataobject query operator factory definitions
+  #
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.alias:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Alias
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: alias }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.concatenator:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Concatenator
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: concatenator }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.dateformatter:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\DateFormatter
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: dateformatter }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.elementcounter:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\ElementCounter
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: elementcounter }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.substring:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Substring
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: substring }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.thumbnail:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Thumbnail
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: thumbnail }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.thumbnailhtml:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\ThumbnailHtml
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: thumbnailhtml }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.merge:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Merge
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: merge }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.text:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Text
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: text }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.translatevalue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\TranslateValue
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: translatevalue }
+
+  opendxp.datahub.graphql.dataobjectqueryoperator.factory.trimmer:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Factory\DefaultQueryOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator\Trimmer
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectqueryoperator_factory, id: trimmer }
+
+
+  #
+  # asset type definitions
+  #
+  OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetMetadataItem:
+    tags:
+      - { name: opendxp.datahub.graphql.assettype, id: asset_metadata_item }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetInputType:
+    tags:
+      - { name: opendxp.datahub.graphql.assettype, id: asset_input }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetFolderType:
+    tags:
+      - { name: opendxp.datahub.graphql.assettype, id: _asset_folder }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\AssetType\AssetTreeType:
+      tags:
+      - { name: opendxp.datahub.graphql.assettype, id: asset_tree }
+
+  #
+  # classification store type definitions
+  #
+  OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreType\Group:
+    tags:
+      - { name: opendxp.datahub.graphql.cstype, id: cs_group }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreType\Feature:
+    tags:
+      - { name: opendxp.datahub.graphql.cstype, id: cs_feature }
+
+
+  #
+  # dataobject type definitions
+  #
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentTreeType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_tree }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentElementType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_element }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\EmailType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_email }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\HardlinkType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_hardlink }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\LinkType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_link }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\PageType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_page }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\SnippetType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: document_snippet }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentFolderType:
+    tags:
+      - { name: opendxp.datahub.graphql.documenttype, id: _document_folder }
+
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentLinkInputType:
+      tags:
+          - { name: opendxp.datahub.graphql.documenttype, id: document_link_input }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ElementDescriptorInputType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: elementdescriptor_input }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ObjectReferenceInputType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: object_reference_input }
+
+  OpenDxp\Bundle\DataHubBundle\Service\DataObjectByUuidResolver: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\GeopointInputType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: geopoint_input }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ObjectTreeType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: object_tree }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\ObjectFolderType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: _object_folder }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\HotspotType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: object_datatype_hotspotimage }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\HrefType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: manytoone }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\InputQuantityValueType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: input_quantity_value }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\InputQuantityValueInputType:
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjecttype, id: input_quantity_value_input }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\QuantityValueType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: quantity_value }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\UrlSlugType:
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjecttype, id: url_slug }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\VideoType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: object_datatype_video }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\VideoTypeDataType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: object_datatype_video_data }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\QuantityValueInputType:
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjecttype, id: quantity_value_input }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\LinkInputType:
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjecttype, id: link_input }
+  #
+  # document mutation types
+  #
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentType\DocumentPageInputType:
+      tags:
+          - { name: opendxp.datahub.graphql.document_inputtype, id: document_page_input }
+
+  #
+  # input type definitions
+  #
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectType\InputType\ImageInputType:
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjecttype, id: image_input }
+
+  # document element mutation data types
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_areablock:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Areablock
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_areablock }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_block:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Block
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_block }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_embed:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Embed
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_embed }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_image:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Image
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_image }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_input:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Input
+    tags:
+        - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_input }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_multiselect:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Multiselect
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_multiselect }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_scheduledblock:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Scheduledblock
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_scheduledblock }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_select:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Select
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_select }
+
+  opendxp.datahub.graphql.documentelementmutationtypegenerator_datatype_wysiwyg:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementMutationFieldConfigGenerator\Wysiwyg
+      tags:
+          - { name: opendxp.datahub.graphql.documentelementmutationtypegenerator, id: typegenerator_documentelementmutationdatatype_wysiwyg }
+
+  # document element input processors
+  opendxp.datahub.graphql.documentmutationelementprocessor: '@OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Areablock'
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Areablock: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Block: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Embed: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Image: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Input: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Multiselect: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Scheduledblock: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Select: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementInputProcessor\Wysiwyg: ~
+
+
+  OpenDxp\Model\Document\Editable\Loader\EditableLoaderInterface: '@OpenDxp\Model\Document\Editable\Loader\EditableLoader'
+
+  #
+  # built-in dataobject mutation datatypes type generator
+  #
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_booleanSelect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\BooleanSelect
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_booleanSelect }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_checkbox:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Checkbox
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_checkbox }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_country:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_country }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_countrymultiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Multiselect
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_countrymultiselect }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_date:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Date
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_date }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_datetime:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Date
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_datetime }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_email:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_email }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_externalImage:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\ExternalImage
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_externalImage }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_fieldcollections:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Fieldcollections
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_fieldcollections }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_geopoint:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Geopoint
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_geopoint }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_firstname:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_firstname }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_gender:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_gender }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_input:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_input }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_image:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Image
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_image }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_language:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_language }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_lastname:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_lastname }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_newsletterActive:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Checkbox
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_newsletterActive }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_manyToOneRelation:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\ManyToOneRelationUuid
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_manyToOneRelation }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_manyToManyRelation:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\ManyToManyRelation
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_manyToManyRelation }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_manyToManyObjectRelation:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\ManyToManyObjectRelation
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_manyToManyObjectRelation }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_advancedManyToManyRelation:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\AdvancedManyToManyRelation
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_advancedManyToManyRelation }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_advancedManyToManyObjectRelation:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\AdvancedManyToManyObjectRelation
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_advancedManyToManyObjectRelation }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_multiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Multiselect
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_multiselect }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_newsletterConfirmed:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Checkbox
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_newsletterConfirmed }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_numeric:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Numeric
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_numeric }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_select:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_select }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_slider:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Numeric
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_slider }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_textarea:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_textarea }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_time:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_time }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_wysiwyg:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Base
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_wysiwyg }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_quantityValue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\QuantityValue
+    tags:
+        - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_quantityValue }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_inputQuantityValue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\InputQuantityValue
+    tags:
+        - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_inputQuantityValue }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_table:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Table
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_table }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_imageGallery:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\ImageGallery
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_imageGallery }
+
+  # dataobject mutation operator
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_operator_ifempty:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationOperatorConfigGenerator\IfEmpty
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationoperator_ifempty }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_operator_localeswitcher:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationOperatorConfigGenerator\LocaleSwitcher
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationoperator_localeswitcher }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_operator_localecollector:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationOperatorConfigGenerator\LocaleCollector
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationoperator_localecollector }
+
+  opendxp.datahub.graphql.dataobjectmutationtypegenerator_datatype_link:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationFieldConfigGenerator\Link
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationtypegenerator, id: typegenerator_dataobjectmutationdatatype_link }
+  #
+  # dataobject mutation operator factory definitions
+  #
+
+  opendxp.datahub.graphql.dataobjectmutationoperator.factory.ifempty:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Mutation\Operator\Factory\DefaultMutationOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationOperatorConfigGenerator\IfEmpty
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationoperator_factory, id: ifempty }
+
+  opendxp.datahub.graphql.dataobjectmutationoperator.factory.localeswitcher:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\Mutation\Operator\Factory\DefaultMutationOperatorFactory
+    arguments:
+      $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationOperatorConfigGenerator\LocaleSwitcher
+    tags:
+      - { name: opendxp.datahub.graphql.dataobjectmutationoperator_factory, id: localeswitcher }
+
+  opendxp.datahub.graphql.dataobjectmutationoperator.factory.localecollector:
+      class: OpenDxp\Bundle\DataHubBundle\GraphQL\Mutation\Operator\Factory\DefaultMutationOperatorFactory
+      arguments:
+          $className: OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectMutationOperatorConfigGenerator\LocaleCollector
+      tags:
+          - { name: opendxp.datahub.graphql.dataobjectmutationoperator_factory, id: localecollector }
+
+  # classification store
+  #
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_booleanSelect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\BooleanSelect
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_booleanSelect }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_calculatedValue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\CalculatedValue
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_calculatedValue }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_checkbox:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Checkbox
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_checkbox }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_country:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Country
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_country }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_countrymultiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Countrymultiselect
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_countrymultiselect }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_date:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Date
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_date }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_datetime:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Datetime
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_datetime }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_input:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Input
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_input }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_inputQuantityValue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\InputQuantityValue
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_inputQuantityValue }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_language:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Language
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_language }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_languagemultiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Languagemultiselect
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_languagemultiselect }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_multiselect:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Multiselect
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_multiselect }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_numeric:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Numeric
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_numeric }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_rgbaColor:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\RgbaColor
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_rgbaColor }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_select:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Select
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_select }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_slider:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Slider
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_slider }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_textarea:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Textarea
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_textarea }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_time:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Time
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_time }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_quantityValue:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\QuantityValue
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_quantityValue }
+
+  opendxp.datahub.graphql.csfeaturequerytypegenerator_datatype_wysiwyg:
+    class: OpenDxp\Bundle\DataHubBundle\GraphQL\ClassificationstoreFeatureQueryTypeGenerator\Wysiwyg
+    tags:
+      - { name: opendxp.datahub.graphql.csfeaturequerytypegenerator, id: typegenerator_csfeaturequerydatatype_wysiwyg }
+
+
+  # properties
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\ObjectsType: ~
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\ElementPropertyType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: elementproperty }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\HotspotMetadataType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: hotspotmetadata }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\AssetType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_asset }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\DocumentType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_document }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\AssetFolderType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_assetfolder }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\DocumentFolderType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_documentfolder }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\ObjectFolderType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_objectfolder }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\DataObjectType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_object }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\CheckboxType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_checkbox }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\TextareaType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_textarea }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\TextType:
+    tags:
+      - { name: opendxp.datahub.graphql.propertytype, id: property_text }
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\PropertyType\SelectType:
+    tags:
+        - { name: opendxp.datahub.graphql.propertytype, id: property_select }
+
+  # element tags
+
+  OpenDxp\Bundle\DataHubBundle\GraphQL\ElementTag:
+    tags:
+      - { name: opendxp.datahub.graphql.elementtag, id: element_tag }

@@ -1,0 +1,12 @@
+app:
+    resource: "../../../Controller/"
+    type:     attribute
+
+
+admin_opendxpdatahub_config:
+    path: /pimcore-datahub-webservices/explorer/{clientname}
+    defaults: { _controller: OpenDxp\Bundle\DataHubBundle\Controller\GraphQLExplorerController::explorerAction }
+
+admin_opendxpdatahub_webservice:
+    path: /pimcore-graphql-webservices/{clientname}
+    defaults: { _controller: OpenDxp\Bundle\DataHubBundle\Controller\WebserviceController::webonyxAction }

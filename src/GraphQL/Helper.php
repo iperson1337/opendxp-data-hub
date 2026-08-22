@@ -1,0 +1,270 @@
+<?php
+
+/**
+ * OpenDXP
+ *
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
+ */
+
+namespace OpenDxp\Bundle\DataHubBundle\GraphQL;
+
+use OpenDxp\Db;
+use OpenDxp\Model\DataObject\ClassDefinition\Data;
+use OpenDxp\Model\DataObject\ClassDefinition\Layout;
+use OpenDxp\Model\DataObject\Listing;
+use stdClass;
+
+/**
+ * @internal
+ */
+class Helper
+{
+    /**
+     * @param Listing\Concrete $list
+     * @param stdClass|array $filter
+     * @param array $columns
+     * @param array $mappingTable
+     */
+    public static function addJoins(&$list, $filter, $columns, &$mappingTable = [])
+    {
+        $filterEntries = is_array($filter) ? $filter : [$filter];
+
+        foreach ($filterEntries as $entry) {
+            $parts = get_object_vars($entry);
+
+            foreach ($parts as $key => $value) {
+                foreach ($columns as $column) {
+                    $attributes = $column['attributes'];
+
+                    if (isset($attributes['attribute'])) {
+                        $name = $attributes['attribute'];
+
+                        if (str_contains($name, '~')) {
+                            $nameParts = explode('~', $name);
+                            $brickName = $nameParts[0];
+                            $brickKey = $nameParts[1];
+                            $list->addObjectbrick($brickName);
+                            $mappingTable[$brickKey] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $defaultTable
+     * @param string|array|stdClass $q
+     * @param string|null $op
+     * @param string|null $subject
+     * @param array $fieldMappingTable
+     *
+     * @return string
+     */
+    public static function buildSqlCondition($defaultTable, $q, $op = null, $subject = null, $fieldMappingTable = [])
+    {
+        // Examples:
+        //
+        //q={"o_modificationDate" : {"$gt" : "1000"}}
+        //where ((`o_modificationDate` > '1000') )
+        //
+        //
+        //
+        //
+        //q=[{"o_modificationDate" : {"$gt" : "1000"}}, {"o_modificationDate" : {"$lt" : "9999"}}]
+        //where ( ((`o_modificationDate` > '1000') )  AND  ((`o_modificationDate` < '9999') )  )
+        //
+        //
+        //
+        //
+        //q={"o_modificationDate" : {"$gt" : "1000"}, "$or": [{"o_id": "3", "o_key": {"$like" :"%lorem-ipsum%"}}]}
+        //where ((`o_modificationDate` > '1000') AND  ((`o_id` = '3') OR  ((`o_key` LIKE '%lorem-ipsum%') )  )  )
+        //
+        // q={"$and" : [{"o_published": "0"}, {"o_modificationDate" : {"$gt" : "1000"}, "$or": [{"o_id": "3", "o_key": {"$like" :"%lorem-ipsum%"}}]}]}
+        //
+        // where ( ((`o_published` = '0') )  AND  ((`o_modificationDate` > '1000') AND  ((`o_id` = '3') OR (`o_key` LIKE '%lorem-ipsum%') )  )  )
+
+        if (!$op) {
+            $op = 'AND';
+        }
+        $mappingTable = [
+            '$gt' => '>',
+            '$gte' => '>=',
+            '$lt' => '<',
+            '$lte' => '<=',
+            '$like' => 'LIKE',
+            '$notlike' => 'NOT LIKE',
+            '$notnull' => 'IS NOT NULL',
+            '$not' => 'NOT',
+        ];
+        $ops = array_keys($mappingTable);
+
+        $db = Db::get();
+
+        $parts = [];
+        if (is_string($q)) {
+            return $q;
+        }
+
+        foreach ($q as $key => $value) {
+            if (array_search(strtolower((string) $key), ['$and', '$or']) !== false) {
+                $childOp = strtolower((string) $key) == '$and' ? 'AND' : 'OR';
+
+                if (is_array($value)) {
+                    $childParts = [];
+                    foreach ($value as $arrItem) {
+                        $childParts[] = self::buildSqlCondition(
+                            $defaultTable,
+                            $arrItem,
+                            $childOp,
+                            $subject,
+                            $fieldMappingTable
+                        );
+                    }
+                    $parts[] = implode(' ' . $childOp . ' ', $childParts);
+                } else {
+                    $parts[] = self::buildSqlCondition($defaultTable, $value, $childOp);
+                }
+            } else {
+                if (is_array($value)) {
+                    foreach ($value as $subValue) {
+                        $parts[] = self::buildSqlCondition($defaultTable, $subValue);
+                    }
+                } elseif ($value instanceof stdClass) {
+                    $objectVars = get_object_vars($value);
+                    foreach ($objectVars as $objectVar => $objectValue) {
+                        if ((strtolower((string) $objectVar) === '$in' || strtolower((string) $objectVar) === 'in') && is_array($objectValue)) {
+                            if (empty($objectValue)) {
+                                $parts[] = '(1=0)';
+                            } else {
+                                $quoted = array_map([$db, 'quote'], $objectValue);
+                                $inList = implode(', ', $quoted);
+                                if (isset($fieldMappingTable[$key])) {
+                                    $parts[] = '(' . $db->quoteIdentifier($key) . ' IN (' . $inList . '))';
+                                } else {
+                                    $parts[] = '(' . self::quoteAbsoluteColumnName(
+                                        $defaultTable,
+                                        $key
+                                    ) . ' IN (' . $inList . '))';
+                                }
+                            }
+                        } elseif (array_search(strtolower((string) $objectVar), $ops) !== false) {
+                            $innerOp = $mappingTable[strtolower((string) $objectVar)];
+                            if ($innerOp == 'NOT') {
+                                $valuePart = ' IS NULL';
+                                if (!is_null($objectValue)) {
+                                    $valuePart = ' =' . $db->quote($objectValue);
+                                }
+
+                                if (isset($fieldMappingTable[$key])) {
+                                    $parts[] = '( NOT ' . $db->quoteIdentifier($key) . $valuePart . ')';
+                                } else {
+                                    $parts[] = '( NOT ' . self::quoteAbsoluteColumnName(
+                                        $defaultTable,
+                                        $key
+                                    ) . $valuePart . ')';
+                                }
+                            } else {
+                                $parts[] = '(' . self::quoteAbsoluteColumnName(
+                                    $defaultTable,
+                                    $key
+                                ) . ' ' . $innerOp . ' ' . $db->quote($objectValue) . ')';
+                            }
+                        } else {
+                            if ($objectValue instanceof stdClass) {
+                                $parts[] = self::buildSqlCondition($defaultTable, $objectValue, null, $objectVar);
+                            } else {
+                                if (is_null($objectValue)) {
+                                    $parts[] = '(' . self::quoteAbsoluteColumnName(
+                                        $defaultTable,
+                                        $objectVar
+                                    ) . ' IS NULL)';
+                                } else {
+                                    $parts[] = '(' . self::quoteAbsoluteColumnName(
+                                        $defaultTable,
+                                        $objectVar
+                                    ) . ' = ' . $db->quote($objectValue) . ')';
+                                }
+                            }
+                        }
+                    }
+                    $combinedParts = implode(' ' . $op . ' ', $parts);
+                    $parts = [$combinedParts];
+                } else {
+                    if (array_search(strtolower((string) $key), $ops) !== false) {
+                        $innerOp = $mappingTable[strtolower((string) $key)];
+                        if ($innerOp == 'NOT') {
+                            $parts[] = '(NOT' . self::quoteAbsoluteColumnName(
+                                $defaultTable,
+                                $subject
+                            ) . ' = ' . $db->quote($value) . ')';
+                        } else {
+                            $parts[] = '(' . self::quoteAbsoluteColumnName(
+                                $defaultTable,
+                                $subject
+                            ) . ' ' . $innerOp . ' ' . $db->quote($value) . ')';
+                        }
+                    } else {
+                        if (isset($fieldMappingTable[$key])) {
+                            if (is_null($value)) {
+                                $parts[] = '(' . $db->quoteIdentifier($key) . ' IS NULL)';
+                            } else {
+                                $parts[] = '(' . $db->quoteIdentifier($key) . ' = ' . $db->quote($value) . ')';
+                            }
+                        } else {
+                            if (is_null($value)) {
+                                $parts[] = '(' . self::quoteAbsoluteColumnName($defaultTable, $key) . ' IS NULL)';
+                            } else {
+                                $parts[] = '(' . self::quoteAbsoluteColumnName(
+                                    $defaultTable,
+                                    $key
+                                ) . ' = ' . $db->quote($value) . ')';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $subCondition = ' (' . implode(' ' . $op . ' ', $parts) . ' ) ';
+
+        return $subCondition;
+    }
+
+    /**
+     * @param string $defaultTable
+     * @param string $columnName
+     *
+     * @return string
+     */
+    protected static function quoteAbsoluteColumnName($defaultTable, $columnName)
+    {
+        $db = Db::get();
+        $absoluteColumnName = (str_contains($columnName, '.')) ? $columnName : $defaultTable . '.' . $columnName;
+
+        return $db->quoteIdentifier($absoluteColumnName);
+    }
+
+    /**
+     * @param Layout|Data $def
+     */
+    public static function extractDataDefinitions($def, &$fieldDefinitions = [])
+    {
+        if ($def instanceof Layout || $def instanceof Data\Block || $def instanceof Data\Localizedfields) {
+            if ($def->hasChildren()) {
+                foreach ($def->getChildren() as $child) {
+                    self::extractDataDefinitions($child, $fieldDefinitions);
+                }
+            }
+        } elseif ($def instanceof Data) {
+            $fieldDefinitions[$def->getName()] = $def;
+        }
+    }
+}

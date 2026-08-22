@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * OpenDXP
+ *
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
+ */
+
+namespace OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator;
+
+use GraphQL\Type\Definition\Type;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGeneratorInterface;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\TypeDefinitionInterface;
+use OpenDxp\Model\DataObject\ClassDefinition;
+use OpenDxp\Model\DataObject\ClassDefinition\Data;
+
+class Base implements DataObjectQueryFieldConfigGeneratorInterface, TypeDefinitionInterface
+{
+    use ServiceTrait;
+
+    public function __construct(Service $graphQlService)
+    {
+        $this->setGraphQLService($graphQlService);
+    }
+
+    /**
+     * @param string $attribute
+     * @param ClassDefinition|null $class
+     * @param object|null $container
+     *
+     * @return array
+     */
+    public function getGraphQlFieldConfig($attribute, Data $fieldDefinition, $class = null, $container = null)
+    {
+        return $this->enrichConfig($fieldDefinition, $class, $attribute, [
+            'name' => $fieldDefinition->getName(),
+            'type' => $this->getFieldType($fieldDefinition, $class, $container),
+        ], $container);
+    }
+
+    /**
+     * @param Data $fieldDefinition
+     * @param ClassDefinition $class
+     * @param string $attribute
+     * @param array $graphQLConfig
+     * @param object|null $container
+     *
+     * @return array
+     */
+    public function enrichConfig($fieldDefinition, $class, $attribute, $graphQLConfig, $container = null)
+    {
+        if ($container instanceof Data\Localizedfields) {
+            $graphQLConfig['args'] ??= [];
+            $graphQLConfig['args'] = array_merge($graphQLConfig['args'],
+                [
+                    'language' => [
+                        'type' => Type::string(),
+                    ],
+                    'getFallbackLanguageValue' => [
+                        'type' => Type::boolean(),
+                    ],
+            ]);
+        }
+
+        // for non-standard getters we provide a resolve which takes care of the composed x~y~z key. not needed for standard getters.
+        if (str_contains($attribute, '~') && !isset($graphQLConfig['resolve'])) {
+            $resolver = new Helper\Base($this->getGraphQlService(), $attribute, $fieldDefinition, $class);
+            $graphQLConfig['resolve'] = $resolver->resolve(...);
+        }
+
+        return $graphQLConfig;
+    }
+
+    /**
+     * @param ClassDefinition|null $class
+     * @param object|null $container
+     *
+     * @return Type
+     */
+    public function getFieldType(Data $fieldDefinition, $class = null, $container = null)
+    {
+        return Type::string();
+    }
+
+    /**
+     * @param string $attribute
+     * @param Data $fieldDefinition
+     * @param ClassDefinition $class
+     *
+     * @return array|callable(mixed $value, array $args, array $context, \GraphQL\Type\Definition\ResolveInfo $info): mixed
+     */
+    public function getResolver($attribute, $fieldDefinition, $class)
+    {
+        $resolver = new Helper\Base($this->getGraphQlService(), $attribute, $fieldDefinition, $class);
+
+        return $resolver->resolve(...);
+    }
+}

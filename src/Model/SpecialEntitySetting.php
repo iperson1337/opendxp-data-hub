@@ -1,0 +1,130 @@
+<?php
+
+/**
+ * OpenDXP
+ *
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
+ */
+
+namespace OpenDxp\Bundle\DataHubBundle\Model;
+
+use JsonSerializable;
+use ReturnTypeWillChange;
+
+class SpecialEntitySetting implements JsonSerializable
+{
+    protected $name;
+
+    protected $readPossible = false;
+
+    protected $createPossible = false;
+
+    protected $updatePossible = false;
+
+    protected $deletePossible = false;
+
+    protected $readAllowed = false;
+
+    protected $createAllowed = false;
+
+    protected $updateAllowed = false;
+
+    protected $deleteAllowed = false;
+
+    public function __construct(
+        string $name,
+        bool $readPossible,
+        bool $createPossible,
+        bool $updatePossible,
+        bool $deletePossible,
+        bool $readAllowed,
+        bool $createAllowed,
+        bool $updateAllowed,
+        bool $deleteAllowed
+    ) {
+        $this->name = $name;
+        $this->readPossible = $readPossible;
+        $this->createPossible = $createPossible;
+        $this->updatePossible = $updatePossible;
+        $this->deletePossible = $deletePossible;
+        $this->readAllowed = $readAllowed;
+        $this->createAllowed = $createAllowed;
+        $this->updateAllowed = $updateAllowed;
+        $this->deleteAllowed = $deleteAllowed;
+    }
+
+    /**
+     * @return array
+     */
+    #[ReturnTypeWillChange]
+    public function jsonSerialize()
+    {
+        return [
+            'name' => $this->name,
+            'readPossible' => $this->isReadPossible(),
+            'createPossible' => $this->isCreatePossible(),
+            'updatePossible' => $this->isUpdatePossible(),
+            'deletePossible' => $this->isDeletePossible(),
+
+            'readAllowed' => $this->isReadAllowed(),
+            'createAllowed' => $this->isCreateAllowed(),
+            'updateAllowed' => $this->isUpdateAllowed(),
+            'deleteAllowed' => $this->isDeleteAllowed(),
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function isReadPossible(): bool
+    {
+        return $this->readPossible;
+    }
+
+    public function isCreatePossible(): bool
+    {
+        return $this->createPossible;
+    }
+
+    public function isUpdatePossible(): bool
+    {
+        return $this->updatePossible;
+    }
+
+    public function isDeletePossible(): bool
+    {
+        return $this->deletePossible;
+    }
+
+    public function isReadAllowed(): bool
+    {
+        return $this->readAllowed;
+    }
+
+    public function isCreateAllowed(): bool
+    {
+        return $this->createAllowed;
+    }
+
+    public function isUpdateAllowed(): bool
+    {
+        return $this->updateAllowed;
+    }
+
+    public function isDeleteAllowed(): bool
+    {
+        return $this->deleteAllowed;
+    }
+}

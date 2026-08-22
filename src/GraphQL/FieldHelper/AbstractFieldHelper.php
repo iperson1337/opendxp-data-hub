@@ -1,0 +1,194 @@
+<?php
+
+/**
+ * OpenDXP
+ *
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
+ */
+
+namespace OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper;
+
+use GraphQL\Language\AST\ArgumentNode;
+use GraphQL\Language\AST\FieldNode;
+use GraphQL\Language\AST\FragmentSpreadNode;
+use GraphQL\Language\AST\InlineFragmentNode;
+use GraphQL\Language\AST\NodeList;
+use GraphQL\Language\AST\SelectionSetNode;
+use GraphQL\Type\Definition\ResolveInfo;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
+use OpenDxp\Model\Element\ElementInterface;
+
+abstract class AbstractFieldHelper
+{
+    use ServiceTrait;
+
+    public function __construct()
+    {
+    }
+
+    /**
+     * @param object $container
+     * @param string $astName
+     *
+     * @return bool
+     */
+    public function skipField($container, $astName)
+    {
+        return false;
+    }
+
+    /**
+     * @param array $data
+     * @param object $container
+     * @param array $args
+     * @param array $context
+     * @param ResolveInfo|null $resolveInfo $resolveInfo
+     */
+    public function doExtractData(FieldNode $ast, &$data, $container, $args, $context, $resolveInfo = null)
+    {
+        $astName = $ast->name->value;
+
+        // sometimes we just want to expand relations just to throw them away afterwards because not requested
+        if ($this->skipField($container, $astName)) {
+            return;
+        }
+
+        // example for http://webonyx.github.io/graphql-php/error-handling/
+        //         throw new MySafeException("fieldhelper", "TBD customized error message");
+
+        $getter = 'get' . ucfirst((string) $astName);
+        $arguments = $this->getArguments($ast);
+        $languageArgument = $arguments['language'] ?? null;
+
+        if (method_exists($container, $getter)) {
+            if ($languageArgument) {
+                if ($ast->alias) {
+                    // defer it
+                    $data[$astName] = (fn ($source, $args, $context, ResolveInfo $info) => $container->$getter($args['language'] ?? null));
+                } else {
+                    $data[$astName] = $container->$getter($languageArgument);
+                }
+            } else {
+                $data[$astName] = $container->$getter();
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getArguments(FieldNode $ast)
+    {
+        $result = [];
+        $nodeList = $ast->arguments;
+        $count = $nodeList->count();
+        for ($i = 0; $i < $count; $i++) {
+            /** @var ArgumentNode $argumentNode */
+            $argumentNode = $nodeList[$i];
+            $value = $argumentNode->value->kind === 'ListValue' ? $argumentNode->value->values : $argumentNode->value->value;
+            $result[$argumentNode->name->value] = $value;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param mixed $data
+     * @param object $container
+     * @param array $args
+     * @param array $context
+     *
+     * @return array
+     */
+    public function extractData(&$data, $container, $args, $context = [], ?ResolveInfo $resolveInfo = null)
+    {
+        if ($container instanceof ElementInterface) {
+            // we have to at least add the ID and pass it around even if not requested because we need it internally
+            // to resolve fields of linked elements (such as asset image and so on)
+            $data['id'] = $container->getId();
+        }
+
+        $resolveInfoArray = (array)$resolveInfo;
+        $fieldAstList = (array) $resolveInfoArray['fieldNodes'];
+
+        foreach ($fieldAstList as $astNode) {
+            if ($astNode instanceof FieldNode) {
+                /** @var SelectionSetNode $selectionSet */
+                $selectionSet = $astNode->selectionSet;
+                if ($selectionSet !== null) {
+                    $selections = $selectionSet->selections;
+                    $this->processSelections($data, $selections, $container, $args, $context, $resolveInfo);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param mixed $data
+     * @param NodeList|null $selections
+     * @param object $container
+     * @param array $args
+     * @param array $context
+     */
+    public function processSelections(&$data, $selections, $container, $args, $context, ResolveInfo $resolveInfo)
+    {
+        if (!$selections) {
+            return;
+        }
+
+        foreach ($selections as $selectionNode) {
+            $this->processSelectionNode($data, $selectionNode, $container, $args, $context, $resolveInfo);
+        }
+    }
+
+    private function processSelectionNode(
+        &$data,
+        $selectionNode,
+        $container,
+        $args,
+        $context,
+        ResolveInfo $resolveInfo
+    ): void {
+        if (!$selectionNode) {
+            return;
+        }
+
+        if ($selectionNode instanceof FieldNode) {
+            $this->doExtractData($selectionNode, $data, $container, $args, $context, $resolveInfo);
+        } elseif ($selectionNode instanceof InlineFragmentNode) {
+            $inlineSelectionSetNode = $selectionNode->selectionSet;
+            /** @var NodeList $inlineSelections */
+            $inlineSelections = $inlineSelectionSetNode->selections;
+            $count = $inlineSelections->count();
+            for ($i = 0; $i < $count; $i++) {
+                $inlineNode = $inlineSelections[$i];
+                if ($inlineNode instanceof FieldNode) {
+                    $this->doExtractData($inlineNode, $data, $container, $args, $context, $resolveInfo);
+
+                    continue;
+                }
+                if ($inlineNode instanceof FragmentSpreadNode) {
+                    $this->processSelectionNode($data, $inlineNode, $container, $args, $context, $resolveInfo);
+                }
+            }
+        } elseif ($selectionNode instanceof FragmentSpreadNode) {
+            $fragmentName = $selectionNode->name->value;
+            $knownFragments = $resolveInfo->fragments;
+            $resolvedFragment = $knownFragments[$fragmentName];
+            if ($resolvedFragment) {
+                $fragmentSelectionSet = $resolvedFragment->selectionSet;
+                $fragmentSelections = $fragmentSelectionSet->selections;
+                $this->processSelections($data, $fragmentSelections, $container, $args, $context, $resolveInfo);
+            }
+        }
+    }
+}

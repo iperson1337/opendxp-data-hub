@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * OpenDXP
+ *
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
+ */
+
+namespace OpenDxp\Bundle\DataHubBundle\GraphQL\Resolver;
+
+use Exception;
+use GraphQL\Type\Definition\ResolveInfo;
+use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\ListingEvents;
+use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ListingEvent;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\ElementDescriptor;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
+class TranslationListing
+{
+    use ServiceTrait;
+
+    public function __construct(
+        Service $graphQlService,
+        protected EventDispatcherInterface $eventDispatcher
+    ) {
+        $this->setGraphQLService($graphQlService);
+    }
+
+    public function resolveEdge(mixed $value = null, array $args = [], array $context = [], ?ResolveInfo $resolveInfo = null): mixed
+    {
+        $translation = $value['node'];
+        $data = new ElementDescriptor();
+
+        $fieldHelper = $this->getGraphQlService()->getObjectFieldHelper();
+
+        return $fieldHelper->extractData($data, $translation, $args, $context, $resolveInfo);
+    }
+
+    public function resolveEdges(mixed $value = null, array $args = [], array $context = [], ?ResolveInfo $resolveInfo = null): mixed
+    {
+        return $value['edges'];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function resolveListing(mixed $value = null, array $args = [], array $context = [], ?ResolveInfo $resolveInfo = null): array
+    {
+        // get list of types
+        $list = new \OpenDxp\Model\Translation\Listing();
+
+        if (!empty($args['keys'])) {
+            $keysArray = explode(',', (string) $args['keys']);
+            $keysArray = array_map(fn ($value): string => $list->quote($value), $keysArray);
+            $keysString = implode(',', $keysArray);
+            $list->setCondition('`key` IN (' . $keysString . ')');
+        }
+
+        if (!empty($args['languages'])) {
+            $languages = str_replace(' ', '', $args['languages']);
+            $list->setLanguages(explode(',', $languages));
+        }
+
+        if (!empty($args['domain'])) {
+            $list->setDomain($args['domain']);
+        }
+
+        // sorting
+        if (!empty($args['sortBy'])) {
+            $list->setOrderKey($args['sortBy']);
+            if (!empty($args['sortOrder'])) {
+                $list->setOrder($args['sortOrder']);
+            }
+        }
+
+        // paging
+        if (isset($args['first'])) {
+            $list->setLimit($args['first']);
+        }
+
+        if (isset($args['after'])) {
+            $list->setOffset($args['after']);
+        }
+
+        $event = new ListingEvent(
+            $list,
+            $args,
+            $context,
+            $resolveInfo
+        );
+        $this->eventDispatcher->dispatch($event, ListingEvents::PRE_LOAD);
+        $list = $event->getListing();
+
+        $totalCount = $list->count();
+        $list->getData();
+
+        $nodes = [];
+
+        foreach ($list as $translation) {
+            $nodes[] = [
+                'cursor' => 'translation-' . $translation->getKey(),
+                'node' => $translation,
+            ];
+        }
+        $connection = [];
+        $connection['edges'] = $nodes;
+        $connection['totalCount'] = $totalCount;
+
+        return $connection;
+    }
+
+    public function resolveListingTotalCount(mixed $value = null, array $args = [], array $context = [], ?ResolveInfo $resolveInfo = null): mixed
+    {
+        return $value['totalCount'];
+    }
+}

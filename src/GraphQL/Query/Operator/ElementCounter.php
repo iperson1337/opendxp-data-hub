@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * OpenDXP
+ *
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
+ */
+
+namespace OpenDxp\Bundle\DataHubBundle\GraphQL\Query\Operator;
+
+use Exception;
+use GraphQL\Type\Definition\ResolveInfo;
+use OpenDxp\Model\Element\ElementInterface;
+use stdClass;
+
+class ElementCounter extends AbstractOperator
+{
+    private $countEmpty;
+
+    /**
+     * @param array|null $context
+     */
+    public function __construct(array $config, $context = null)
+    {
+        parent::__construct($config, $context);
+
+        $this->countEmpty = $config['countEmpty'];
+    }
+
+    /**
+     * @param ElementInterface|null $element
+     *
+     * @return stdClass
+     *
+     * @throws Exception
+     */
+    public function getLabeledValue($element, ?ResolveInfo $resolveInfo = null)
+    {
+        $result = new stdClass();
+        $result->label = $this->label;
+
+        $children = $this->getChildren();
+        $count = 0;
+
+        foreach ($children as $c) {
+            $valueResolver = $this->getGraphQlService()->buildValueResolverFromAttributes($c);
+
+            $childResult = $valueResolver->getLabeledValue($element, $resolveInfo);
+            if ($childResult !== null) {
+                $childValues = $childResult->value;
+
+                if ($this->getCountEmpty()) {
+                    if (is_array($childValues)) {
+                        $count += count($childValues);
+                    } else {
+                        $count++;
+                    }
+                } else {
+                    if (is_array($childValues)) {
+                        foreach ($childValues as $childValue) {
+                            if ($childValue) {
+                                $count++;
+                            }
+                        }
+                    } elseif ($childValues) {
+                        $count++;
+                    }
+                }
+            }
+        }
+
+        $result->value = $count;
+
+        return $result;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCountEmpty()
+    {
+        return $this->countEmpty;
+    }
+
+    /**
+     * @param mixed $countEmpty
+     */
+    public function setCountEmpty($countEmpty)
+    {
+        $this->countEmpty = $countEmpty;
+    }
+}

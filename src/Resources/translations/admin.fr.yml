@@ -1,0 +1,101 @@
+---
+plugin_opendxp_datahub_toolbar: Datahub
+plugin_opendxp_datahub_configpanel_add: Ajouter une configuration
+plugin_opendxp_datahub_configpanel_enterkey_title: Ajouter une nouvelle configuration
+plugin_opendxp_datahub_configpanel_enterkey_prompt: Identifieur unique
+plugin_opendxp_datahub_configpanel_error_adding_config: Error adding configuration
+plugin_opendxp_datahub_configpanel: Configuration
+plugin_opendxp_datahub_configpanel_invalid_name: Nom non valide
+plugin_opendxp_datahub_configpanel_invalid_length: Exceeded maximum configuration
+  name length 80 of characters
+plugin_opendxp_datahub_configpanel_error_cloning_config: Error cloning configuration
+plugin_opendxp_datahub_configpanel_enterclonekey_title: Dupliquer
+plugin_opendxp_datahub_configpanel_enterclonekey_enterclonekey_prompt: Nom de la copie
+plugin_opendxp_datahub_configpanel_item_save_success: "Configuration sauvegard\xE9e"
+plugin_opendxp_datahub_configpanel_item_saveerror: "La configuration n'a pas pu \xEAtre
+  sauvegard\xE9e"
+plugin_opendxp_datahub_configpanel_item_saveerror_permissions: Configuration cannot
+  be saved because it would deprive your update permissions. Please check the permissions
+  tab.
+plugin_opendxp_datahub_configpanel_item_general: "G\xE9n\xE9ral"
+plugin_opendxp_datahub_configpanel_sqlObjectCondition: SQL Condition
+plugin_opendxp_datahub_configpanel_schema: "D\xE9finition de sch\xE9ma"
+plugin_opendxp_datahub_configpanel_schema_fields: Schema Fields
+plugin_opendxp_datahub_configpanel_security: Security Definition
+plugin_opendxp_datahub_configpanel_security_method: "M\xE9thode"
+plugin_opendxp_datahub_configpanel_security_method_apikey: "Cl\xE9 API"
+plugin_opendxp_datahub_configpanel_fields: Champs
+plugin_opendxp_datahub_configpanel_entity: "Entit\xE9"
+plugin_opendxp_datahub_configpanel_root: Root Node
+plugin_opendxp_datahub_fieldName: Nom du champ
+plugin_opendxp_datahub_configpanel_condition_hint: This is a global SQL condition
+  in addition to the workspace settings that will be added to all queries
+plugin_opendxp_datahub_configpanel_available_fields: Champs disponibles
+plugin_opendxp_datahub_operator_thumbnail_config: Configuration
+plugin_opendxp_datahub_operator_select_entity: "S\xE9lectionner l'entit\xE9"
+plugin_opendxp_datahub_security_datahub_apikey: Datahub API Keys
+plugin_opendxp_datahub_security_definition: Security Definition
+plugin_opendxp_datahub_security_apikey_description: API key required for web service
+  access. One API key per line allowed. At least one key with minimum 16 characters
+  needs to be provided.
+plugin_opendxp_datahub_config: Datahub Config
+plugin_datahub_config: Datahub Config
+plugin_datahub_adapter_graphql: Datahub Adapter - GraphQL
+plugin_datahub_admin: Datahub Admin
+plugin_opendxp_datahub_type_graphql: GraphQL
+plugin_opendxp_datahub_workspace_permission_create: "Cr\xE9er"
+plugin_opendxp_datahub_workspace_permission_read: Lire
+plugin_opendxp_datahub_workspace_permission_update: "Mettre \xE0 jour"
+plugin_opendxp_datahub_workspace_permission_delete: Supprimer
+plugin_opendxp_datahub_graphql_open_explorer_in_iframe: Ouvrir dans Iframe
+plugin_opendxp_datahub_graphql_open_explorer_in_tab: Ouvrir dans un tableau
+plugin_opendxp_datahub_graphql_query_schema: "Sch\xE9ma de requ\xEAte"
+plugin_opendxp_datahub_graphql_mutation_schema: "Sch\xE9ma de mutation"
+plugin_opendxp_datahub_graphql_iexplorer: iExplorer
+plugin_opendxp_datahub_datatype_not_supported_yet: datatype '%s' not supported yet
+operator_alias: Alias
+operator_concatenator: Operator Concatenator
+operator_dateformatter: Date Formatter
+operator_element_counter: Element Counter
+operator_text: Operator Text
+operator_merge: Merge (deprecated)
+operator_substring: "Sous-cha\xEEne"
+operator_thumbnail: Miniature
+operator_thumbnail_html: Miniature HTML
+operator_translate_value: Operator Translate Value
+operator_trimmer: Trimmer
+mutationoperator_locale_switcher: Locale Switcher
+mutationoperator_ifempty: IfEmpty
+mutationoperator_locale_collector: Locale Collector
+mutationoperator_locale_switcher_description: "Passe \xE0 une autre langue que celle
+  par d\xE9faut."
+mutationoperator_ifempty_description: "Ne d\xE9finir une valeur que si la valeur actuelle
+  est vide."
+mutationoperator_locale_collector_description: "Permet d'\xE9diter toutes les langues
+  pour un seul champ."
+plugin_opendxp_datahub_query: "Requ\xEAte"
+plugin_opendxp_datahub_mutation: Mutation
+plugin_opendxp_datahub_graphql_special_schema: "Types g\xE9n\xE9riques"
+plugin_opendxp_datahub_graphql_special_document: Document
+plugin_opendxp_datahub_graphql_special_document_folder: Document Folder
+plugin_opendxp_datahub_graphql_special_asset: Actif
+plugin_opendxp_datahub_graphql_special_asset_folder: Dossier des actifs
+plugin_opendxp_datahub_graphql_special_object_folder: Dossier des objets
+plugin_opendxp_datahub_graphql_special_asset_listing: Listage des actifs
+plugin_opendxp_datahub_graphql_special_translation_listing: Liste de traduction
+plugin_opendxp_datahub_graphql_special_translation: Traduction
+read: Lire
+plugin_opendxp_datahub_skip_permission_check: Skip Permission Check
+plugin_opendxp_datahub_configpanel_permissions: Permissions
+plugin_opendxp_datahub_graphql_permissions_roles: Role Permissions
+plugin_opendxp_datahub_graphql_permissions_users: Permissions des utilisateurs
+plugin_opendxp_datahub_operator_select_user: "S\xE9lectionner un utilisateur"
+plugin_opendxp_datahub_operator_select_role: "S\xE9lectionner un r\xF4le"
+plugin_opendxp_datahub_configpanel_user: Utilisateur
+plugin_opendxp_datahub_configpanel_role: "R\xF4le"
+plugin_opendxp_datahub_disable_introspection: Disable Introspection
+plugin_opendxp_datahub_security_introspection_description: 'Please note: When introspection
+  is disabled, the autocomplete feature will not work.'
+plugin_opendxp_datahub_import: Importer
+plugin_opendxp_datahub_export: Exporter
+...
