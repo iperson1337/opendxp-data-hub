@@ -37,7 +37,10 @@ class Version20210305134111 extends BundleAwareMigration
 
     public function up(Schema $schema): void
     {
-        SettingsStore::set('BUNDLE_INSTALLED__OpenDxp\\Bundle\\DataHubBundle\\OpenDxpDataHubBundle', true, 'bool', 'pimcore');
+        // scope 'opendxp', не 'pimcore': id переименовали при порте, а аргумент scope — нет.
+        // SettingsStoreAwareInstaller::isInstalled() читает именно 'opendxp', поэтому со старым
+        // значением бандл навсегда числился неустановленным. Свип неймспейсов литералы не видит.
+        SettingsStore::set('BUNDLE_INSTALLED__OpenDxp\\Bundle\\DataHubBundle\\OpenDxpDataHubBundle', true, 'bool', 'opendxp');
     }
 
     public function down(Schema $schema): void
