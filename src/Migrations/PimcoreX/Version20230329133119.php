@@ -39,7 +39,11 @@ final class Version20230329133119 extends AbstractMigration
 
     private function renameConfigFolder(string $folder, string $search, string $replace): void
     {
-        $configDir = \Pimcore::getContainer()->getParameter('kernel.project_dir') . '/var/config/';
+        // \Pimcore в OpenDXP не существует — глобальный класс называется \OpenDxp.
+        // Свип порта ищет «Pimcore\» (с обратным слэшем ПОСЛЕ слова) и это место не видел:
+        // здесь слэш стоит ПЕРЕД. Ни php -l, ни статанализ не ловят — падает только при
+        // выполнении миграции, то есть на деплое.
+        $configDir = \OpenDxp::getContainer()->getParameter('kernel.project_dir') . '/var/config/';
         if (is_dir($configDir . $folder)) {
             rename($configDir . $folder, $configDir . str_replace($search, $replace, $folder));
         }
