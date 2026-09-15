@@ -58,8 +58,16 @@ services:
     calls:
       - [setGraphQlService, ['@OpenDxp\Bundle\DataHubBundle\GraphQL\Service']]
 
+  # Имя превью сверяется точно, с учётом регистра: `thumbnail: "small"` при конфиге
+  # `Small` иначе молча уходит в отдельную ветку image-thumb__<id>__small/ мимо прогрева.
+  # Логгер и маркер подставляет приложение (config/services.yaml), по умолчанию — NullLogger.
+  OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\ThumbnailNameValidator:
+    public: false
+
   OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\AssetFieldHelper:
     public: false
+    arguments:
+      $thumbnailNameValidator: '@OpenDxp\Bundle\DataHubBundle\GraphQL\FieldHelper\ThumbnailNameValidator'
     calls:
       - [setGraphQlService, ['@OpenDxp\Bundle\DataHubBundle\GraphQL\Service']]
 

@@ -24,6 +24,23 @@ use Override;
 
 class AssetFieldHelper extends AbstractFieldHelper
 {
+    public function __construct(private readonly ?ThumbnailNameValidator $thumbnailNameValidator = null)
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Сверяет имя превью из GraphQL-запроса с конфигурацией — точно, с учётом регистра.
+     * Вызывается всеми путями, которые принимают имя от потребителя, в том числе теми,
+     * что идут в `Asset::getThumbnail()` напрямую, мимо `getAssetThumbnail()`.
+     *
+     * @throws \OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException
+     */
+    public function assertThumbnailNameExists(Asset $asset, mixed $thumbNailConfig): void
+    {
+        $this->thumbnailNameValidator?->assertNameExists($asset, $thumbNailConfig);
+    }
+
     public function getVideoThumbnail(Asset\Video $asset, string | Video\Thumbnail\Config $thumbNailConfig, ?string $thumbNailFormat = null): mixed
     {
         if (isset($thumbNailFormat) && $thumbNailFormat !== 'image') {
@@ -75,6 +92,8 @@ class AssetFieldHelper extends AbstractFieldHelper
         ?string $thumbNailFormat = null,
         bool $deferred = false
     ): mixed {
+        $this->assertThumbnailNameExists($asset, $thumbNailConfig);
+
         if (($asset instanceof Asset\Video) && (is_string($thumbNailConfig) || $thumbNailConfig instanceof Video\Thumbnail\Config)) {
             return $this->getVideoThumbnail($asset, $thumbNailConfig, $thumbNailFormat);
         } else {
@@ -111,11 +130,17 @@ class AssetFieldHelper extends AbstractFieldHelper
             if ($ast->alias) {
                 // defer it
                 $data[$realName] = function ($source, $args, $context, ResolveInfo $info) use ($container, $realName) {
+                    // getAssetThumbnail, а не getThumbnail напрямую: только так работают сверка
+                    // имени превью и значение аргумента `deferred` — у алиасных запросов флаг
+                    // был зашит в false, то есть аргумент из запроса не действовал вовсе.
+                    // Дефолт false сохраняет прежнее поведение (см. AssetType, поле fullpath).
+                    $deferred = $args['deferred'] ?? false;
+
                     if ($realName === 'fullpath') {
-                        return $container->getThumbnail($args['thumbnail'], false);
+                        return $this->getAssetThumbnail($container, $args['thumbnail'], null, $deferred);
                     }
                     if ($realName === 'data') {
-                        $thumb = $container->getThumbnail($args['thumbnail'], false);
+                        $thumb = $this->getAssetThumbnail($container, $args['thumbnail'], null, $deferred);
 
                         return stream_get_contents($thumb->getStream());
                     }
@@ -125,7 +150,16 @@ class AssetFieldHelper extends AbstractFieldHelper
             } else {
                 //TODO extract duplicate code
                 if ($realName == 'fullpath') {
-                    $data[$realName] = $container->getThumbnail($thumbnailArgument);
+                    // ?? true — прежнее поведение этой ветки: раньше Asset::getThumbnail()
+                    // звался здесь без второго аргумента, а у OpenDXP он по умолчанию
+                    // deferred=true. Явный `deferred: false` из запроса теперь действует
+                    // и здесь (в AST дефолты схемы не попадают).
+                    $data[$realName] = $this->getAssetThumbnail(
+                        $container,
+                        $thumbnailArgument,
+                        null,
+                        $arguments['deferred'] ?? true
+                    );
                 } elseif ($realName == 'data') {
                     $thumb = $this->getAssetThumbnail($container, $thumbnailArgument, $thumbnailFormat);
                     if ($thumb) {

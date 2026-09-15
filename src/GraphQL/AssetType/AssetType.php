@@ -106,6 +106,12 @@ class AssetType extends ObjectType
                 'args' => [
                     'thumbnail' => ['type' => Type::string()],
                     'format' => ['type' => Type::string()],
+                    // deferred=false: превью, которого нет, генерируется синхронно прямо в резолвере.
+                    // На listing-запросах это сотни генераций Imagick в одном HTTP-запросе и риск 500
+                    // по memory_limit/max_execution_time. Дефолт всё равно остаётся false: при
+                    // deferred=true путь отдаётся БЕЗ проверки файла, а frontend_prefixes.thumbnail_deferred
+                    // указывает на MinIO, то есть ссылка идёт мимо PublicServicesController::thumbnailAction
+                    // и сама себя не «долечивает» — непрогретое превью превращается в молча битую ссылку.
                     'deferred' => ['type' => Type::boolean(), 'defaultValue' => false],
                 ],
                 'resolve' => $resolver->resolvePath(...),

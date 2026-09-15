@@ -299,6 +299,12 @@ class AssetType
             $thumbnailName = $args['thumbnail'] ?? null;
             $asset = $this->getAssetFromValue($value, $context);
 
+            // Дальше имя уходит в Asset::getThumbnail()/getImageThumbnail() напрямую,
+            // мимо getAssetThumbnail() — сверяем регистр здесь.
+            if ($asset instanceof Asset && $thumbnailName) {
+                $this->getGraphQLService()->getAssetFieldHelper()->assertThumbnailNameExists($asset, $thumbnailName);
+            }
+
             if ($asset instanceof Asset\Video) {
                 $width = $asset->getCustomSetting('videoWidth');
                 $height = $asset->getCustomSetting('videoHeight');
