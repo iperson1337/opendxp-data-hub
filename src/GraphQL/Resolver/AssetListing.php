@@ -25,6 +25,7 @@ use OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Helper;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\WorkspaceConditionBuilder;
 use OpenDxp\Bundle\DataHubBundle\WorkspaceHelper;
 use OpenDxp\Db;
 use OpenDxp\Model\Asset;
@@ -139,24 +140,17 @@ class AssetListing
         $tableName = 'assets';
 
         if (!$configuration->skipPermisssionCheck()) {
-            $workspacesTableName = 'plugin_datahub_workspaces_asset';
-            $conditionParts[] = ' (
-            (
-                SELECT `read` from ' . $db->quoteIdentifier($workspacesTableName) . '
-                WHERE ' . $db->quoteIdentifier($workspacesTableName) . '.configuration = ' . $db->quote($configuration->getName()) . '
-                AND LOCATE(CONCAT(' . $db->quoteIdentifier($tableName) . '.path,' . $db->quoteIdentifier($tableName) . '.filename),' . $db->quoteIdentifier($workspacesTableName) . '.cpath)=1
-                ORDER BY LENGTH(' . $db->quoteIdentifier($workspacesTableName) . '.cpath) DESC
-                LIMIT 1
-            )=1
-            OR
-            (
-                SELECT `read` from ' . $db->quoteIdentifier($workspacesTableName) . '
-                WHERE ' . $db->quoteIdentifier($workspacesTableName) . '.configuration = ' . $db->quote($configuration->getName()) . '
-                AND LOCATE(' . $db->quoteIdentifier($workspacesTableName) . '.cpath,CONCAT(' . $db->quoteIdentifier($tableName) . '.path,' . $db->quoteIdentifier($tableName) . '.filename))=1
-                ORDER BY LENGTH(' . $db->quoteIdentifier($workspacesTableName) . '.cpath) DESC
-                LIMIT 1
-            )=1
-            )';
+            $workspaces = $db->fetchAllAssociative(
+                'SELECT cpath, `read` FROM plugin_datahub_workspaces_asset WHERE configuration = ?',
+                [$configuration->getName()]
+            );
+
+            $permissionCondition = WorkspaceConditionBuilder::forConnection($db)
+                ->build($tableName, 'filename', $workspaces);
+
+            if ($permissionCondition !== null) {
+                $conditionParts[] = $permissionCondition;
+            }
         }
 
         if (isset($args['filter'])) {

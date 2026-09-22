@@ -27,6 +27,7 @@ use OpenDxp\Bundle\DataHubBundle\GraphQL\Helper;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ElementIdentificationTrait;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\PermissionInfoTrait;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\WorkspaceConditionBuilder;
 use OpenDxp\Bundle\DataHubBundle\WorkspaceHelper;
 use OpenDxp\Db;
 use OpenDxp\Logger;
@@ -524,24 +525,17 @@ class QueryType
 
         if (!$configuration->skipPermisssionCheck()) {
             // check permissions
-            $workspacesTableName = 'plugin_datahub_workspaces_object';
-            $conditionParts[] = '(
-            (
-                SELECT `read` from ' . $db->quoteIdentifier($workspacesTableName) . '
-                WHERE ' . $db->quoteIdentifier($workspacesTableName) . '.configuration = ' . $db->quote($configuration->getName()) . '
-                AND LOCATE(CONCAT(' . $db->quoteIdentifier($tableName) . '.path,' . $db->quoteIdentifier($tableName) . '.key),' . $db->quoteIdentifier($workspacesTableName) . '.cpath)=1
-                ORDER BY LENGTH(' . $db->quoteIdentifier($workspacesTableName) . '.cpath) DESC
-                LIMIT 1
-            )=1
-            OR
-            (
-                SELECT `read` from ' . $db->quoteIdentifier($workspacesTableName) . '
-                WHERE ' . $db->quoteIdentifier($workspacesTableName) . '.configuration = ' . $db->quote($configuration->getName()) . '
-                AND LOCATE(' . $db->quoteIdentifier($workspacesTableName) . '.cpath,CONCAT(' . $db->quoteIdentifier($tableName) . '.path,' . $db->quoteIdentifier($tableName) . '.key))=1
-                ORDER BY LENGTH(' . $db->quoteIdentifier($workspacesTableName) . '.cpath) DESC
-                LIMIT 1
-            )=1
-            )';
+            $workspaces = $db->fetchAllAssociative(
+                'SELECT cpath, `read` FROM plugin_datahub_workspaces_object WHERE configuration = ?',
+                [$configuration->getName()]
+            );
+
+            $permissionCondition = WorkspaceConditionBuilder::forConnection($db)
+                ->build($tableName, 'key', $workspaces);
+
+            if ($permissionCondition !== null) {
+                $conditionParts[] = $permissionCondition;
+            }
         }
 
         if (isset($args['filter'])) {
