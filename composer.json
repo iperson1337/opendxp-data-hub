@@ -1,6 +1,6 @@
 {
     "name": "iperson1337/opendxp-data-hub",
-    "license": "GPL-3.0+",
+    "license": "GPL-3.0-or-later",
     "type": "opendxp-bundle",
     "description": "OpenDXP Datahub",
     "config": {
