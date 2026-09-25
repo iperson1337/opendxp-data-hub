@@ -1,5 +1,87 @@
 # Changelog
 
+## [1.1.0] - 2026-09-25
+
+### Безопасность
+- **SQL-инъекция через аргумент `filter`** (`GraphQL\Helper::buildSqlCondition`): строка внутри
+  JSON-фильтра возвращалась в SQL как есть (`{"$or": "1=1"}` снимало условие воркспейса).
+  Теперь любой не-объект в фильтре отвергается `ClientSafeException`, список скаляров у поля
+  трактуется как `$in`, имена колонок проверяются по маске `name` / `table.name`, скалярные
+  операторы не принимают массивы. Унаследовано от Pimcore data-hub 1.9.5.
+- **SQL-инъекция через `ids` в `getAssetListing`**: значение вставлялось без квотирования.
+  Теперь разбивается и квотируется так же, как у объектов.
+- `sortBy` в листингах объектов, ассетов и переводов проверяется по маске имени колонки;
+  `objectTypes` у `children`/`_siblings` ограничен `object|folder|variant`.
+- **Утечка ошибок**: внешний `catch` в `WebserviceController` и поля `message` мутаций отдавали
+  `getMessage()` любого исключения. Теперь клиенту уходят только `ClientAware`-безопасные
+  сообщения (и всё — в debug-режиме), остальное пишется в лог.
+- **CORS**: любой `Origin` отражался вместе с `Access-Control-Allow-Credentials: true`.
+  Credentials теперь выдаются только origin'ам из нового списка `graphql.cors_origins`.
+- **CSRF**: `/admin/opendxpdatahub/config/{delete,add,clone}` принимали GET и обходили
+  CSRF-защиту админки. Теперь только POST; JS админки шлёт POST явно.
+- **Эскалация через `update` на конфигурацию**: не-администратор мог переписать блоки
+  `security` (включая `skipPermissionCheck`), `workspaces` и `sqlObjectCondition`. Изменение
+  этих секций требует `admin` или права `plugin_datahub_admin` (иначе HTTP 403).
+- Страница GraphQL Explorer больше не помечается `public` с TTL до завтра: `private, no-store`.
+- Передача ключа в `?apikey=` объявлена устаревшей (предупреждение в логе); используйте
+  заголовок `X-API-Key`.
+- Лимиты запросов: `graphql.query_depth_limit` (15), `graphql.query_complexity_limit` (1000),
+  `graphql.max_first` (1000). `first` больше лимита — ошибка потребителю, без `first`
+  подставляется лимит. `DisableIntrospection` передаётся в набор валидаторов запроса, а не в
+  глобальный реестр `DocumentValidator`.
+
+### Исправлено
+- **Бандл зависел от класса приложения `App\Service\DataHub\ApiKeyService`** и не собирался
+  вне MDM. Сервис перенесён в бандл (`Service\ApiKeyService` + `ApiKeyServiceInterface`),
+  сравнение ключей — `hash_equals` по всем ключам без раннего выхода; ключи из YAML-конфига
+  продолжают работать как fallback. `Installer` создаёт `plugin_datahub_api_keys`, получил
+  `uninstall()` и возвращает последнюю миграцию.
+- **`WorkspaceHelper::isAllowed` игнорировал запрещающие воркспейсы**: срабатывала первая же
+  строка с флагом `1` от корня вниз. Теперь решает самый глубокий воркспейс на пути к элементу,
+  как и в SQL-условии листинга. Результат кэшируется на запрос. Унаследовано от upstream.
+- Остаток LIKE-экранирования (`str_replace('_', '\\_')`) в `isAllowed` ломал чтение папок
+  с `_` в пути (правило «потомок даёт read предку» никогда не срабатывало).
+- `WorkspaceConditionBuilder` сравнивает пути по границе сегмента: `/foo` больше не покрывает
+  `/foobar/…`; хвостовой слэш в `cpath` из YAML нормализуется. Условие для листинга и
+  PHP-проверка теперь согласованы.
+- `modifyWorkspaceRowByType`: `str_contains` заменён на `str_starts_with` (переименование `/b`
+  задевало воркспейс `/a/b/x`), удаление строк — после цикла.
+- `DataChangeListener` сохранял конфигурацию через `save()` и падал без админ-пользователя
+  (мутации GraphQL, CLI). Добавлен `Configuration::saveAsSystem()`.
+- Output cache: кэшируются только операции `query` с успешным ответом без `errors`; в ключ
+  входят `variables` и `operationName`; multipart-запросы не кэшируются; кэш инвалидируется
+  по тегу `datahub` при любом изменении элементов.
+- `getAssetListing`: `edges` и `totalCount` вычисляются лениво, как у объектов (лишний
+  `COUNT(*)` на каждый запрос).
+- `Helper::addJoins` подключает только brick-таблицы, к полям которых обращается фильтр.
+- Резолверы ассетов (`path`, `data`, `srcset`, …) возвращают `null` вместо PHP Error, если
+  права на ассет отсутствуют.
+- `getBy<Field>`-ветка в getter'е объекта была мёртвой (результат никогда не массив);
+  теперь работает, в том числе для localized-идентификаторов.
+- `filter: "[]"`/`"0"` больше не отвергаются как «JSON error: No error»; отсутствующий
+  `columnConfig` не даёт Warning.
+- `DataObjectInputProcessor\Date`: невалидная дата — ошибка потребителю, а не 1970-01-01.
+- Миграция `Version20221212152145` искала scope `pimcore_data_hub`; теперь оба scope.
+- `Version20211108160248::down()` удалял все права от найденного индекса до конца.
+
+### Изменено
+- Публичные пути роутов: `/opendxp-graphql-webservices/{clientname}` и
+  `/opendxp-datahub-webservices/explorer/{clientname}`. Старые `/pimcore-…` пути обслуживаются
+  как legacy-алиасы.
+- Удалены мёртвые классы `ManyToOneRelation` (генератор и input-процессор), мёртвый сервис
+  `DocumentElementType\ImageDataType`, ветка совместимости `class_exists("\\OpenDxp\\Db\\Connection")`.
+- Лицензионные шапки PCL в 11 файлах заменены на GPL-шапку OpenDXP.
+
+### Инфраструктура
+- `.gitignore`, `phpstan.neon.dist`, `.php-cs-fixer.dist.php`, GitHub Actions (`php -l`,
+  `composer validate`, phpunit, phpstan, cs-fixer) на PHP 8.3/8.4.
+- `composer.json`: убраны `kernel/Kernel.php`, Codeception и `symfony/phpunit-bridge`;
+  PHPUnit `^10.5 || ^11.0`; скрипты `test`, `phpstan`, `cs-check`, `cs-fix`.
+- Юнит-тесты запускаются без ядра OpenDXP (`tests/bootstrap.php` подставляет заглушки
+  `OpenDxp\Db` и `GraphQL\Error\ClientAware`): фильтр листинга, лимиты, условие воркспейса
+  (граница сегмента, deny внутри allow, корень), сравнение API-ключей.
+- Документация: имя пакета, пути эндпоинтов, `data_hub`, хранение ключей, лимиты и CORS.
+
 ## [1.0.5] - 2026-09-22
 
 ### Оптимизировано

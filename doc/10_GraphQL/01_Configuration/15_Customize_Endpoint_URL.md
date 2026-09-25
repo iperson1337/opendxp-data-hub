@@ -2,15 +2,21 @@
 
 The standard endpoint is
 ```
-/opendxp-graphql-webservices/{clientname}?apikey={yourApiKey}
+/opendxp-graphql-webservices/{clientname}
 ```
 
-So if your configuration name is _blogdemo_ and your apikey _123456_
-then your endpoint would be
+The legacy endpoint `/pimcore-graphql-webservices/{clientname}` (route `admin_opendxpdatahub_webservice_legacy`)
+is still served for backwards compatibility.
+
+The API key should be sent via the `X-API-Key` HTTP header. So if your configuration name is _blogdemo_ and your
+apikey _123456_ then your endpoint would be
 
 ```
-/opendxp-graphql-webservices/blogdemo?apikey=12345
+POST /opendxp-graphql-webservices/blogdemo
+X-API-Key: 123456
 ```
+
+> **Deprecated:** the `?apikey={yourApiKey}` query parameter is still accepted but deprecated. Use the `X-API-Key` header instead.
 
 Here is a configuration example showing how to override the standard endpoint:
 

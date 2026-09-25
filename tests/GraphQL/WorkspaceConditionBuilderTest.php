@@ -27,6 +27,39 @@ class WorkspaceConditionBuilderTest extends TestCase
         );
     }
 
+    /**
+     * Эмуляция условия в PHP: проверяем, что SQL-выражение отдаёт для конкретного пути.
+     * Поддерживает ровно те конструкции, которые генерирует билдер.
+     */
+    private function evaluate(string $condition, string $fullpath): bool
+    {
+        $php = $condition;
+        $php = str_replace('CONCAT(`t`.`path`, `t`.`key`)', '$fp', $php);
+        $php = preg_replace('/LOCATE\(CONCAT\(\$fp, (\'[^\']*\')\), (\'[^\']*\')\) = 1/', 'str_starts_with($2, $fp . $1)', $php);
+        $php = preg_replace('/LOCATE\((\'[^\']*\'), \$fp\) = 1/', 'str_starts_with($fp, $1)', $php);
+        $php = preg_replace('/\$fp = (\'[^\']*\')/', '$fp === $1', $php);
+        $php = preg_replace_callback(
+            '/\(CASE (.*?) ELSE 0 END\)/s',
+            static function (array $m): string {
+                $whens = preg_split('/\s+WHEN\s+/', ' ' . $m[1], -1, PREG_SPLIT_NO_EMPTY);
+                $expr = '0';
+                foreach (array_reverse($whens) as $when) {
+                    [$cond, $then] = preg_split('/\s+THEN\s+/', $when);
+                    $expr = '((' . $cond . ') ? ' . $then . ' : ' . $expr . ')';
+                }
+
+                return $expr;
+            },
+            $php
+        );
+        $php = str_replace(' = 1 OR ', ' == 1 || ', $php);
+        $php = preg_replace('/ = 1\)$/', ' == 1)', $php);
+
+        $fp = $fullpath;
+
+        return (bool) eval('return ' . $php . ';');
+    }
+
     public function testNoWorkspacesDeniesEverything(): void
     {
         // Исходный подзапрос возвращал NULL, а `NULL = 1` отсекало все строки.
@@ -60,26 +93,7 @@ class WorkspaceConditionBuilderTest extends TestCase
         ]);
 
         self::assertNotNull($condition);
-        self::assertStringContainsString("LOCATE('/Товар/Служебное'", $condition);
-    }
-
-    public function testConditionShape(): void
-    {
-        $condition = $this->builder()->build('t', 'key', [
-            ['cpath' => '/', 'read' => 0],
-            ['cpath' => '/Товар/Справочники', 'read' => 1],
-        ]);
-
-        $fullpath = 'CONCAT(`t`.`path`, `t`.`key`)';
-        $expected = sprintf(
-            '((CASE WHEN LOCATE(%1$s, %3$s) = 1 THEN 1 WHEN LOCATE(%2$s, %3$s) = 1 THEN 0 ELSE 0 END) = 1'
-            . ' OR (CASE WHEN LOCATE(%3$s, %1$s) = 1 THEN 1 WHEN LOCATE(%3$s, %2$s) = 1 THEN 0 ELSE 0 END) = 1)',
-            "'/Товар/Справочники'",
-            "'/'",
-            $fullpath,
-        );
-
-        self::assertSame($expected, $condition);
+        self::assertStringContainsString("'/Товар/Служебное'", $condition);
     }
 
     public function testLongestCpathWinsByByteLengthLikeMysqlLength(): void
@@ -117,7 +131,56 @@ class WorkspaceConditionBuilderTest extends TestCase
         ]);
 
         self::assertNotNull($condition);
-        self::assertStringContainsString("LOCATE('/bb', CONCAT(`t`.`path`, `t`.`key`)) = 1 THEN 0", $condition);
-        self::assertStringContainsString("LOCATE('/a', CONCAT(`t`.`path`, `t`.`key`)) = 1 THEN 1", $condition);
+        self::assertFalse($this->evaluate($condition, '/bb/x'));
+        self::assertTrue($this->evaluate($condition, '/a/x'));
+    }
+
+    public function testWorkspaceMatchesOnSegmentBoundaryOnly(): void
+    {
+        $condition = $this->builder()->build('t', 'key', [
+            ['cpath' => '/foo', 'read' => 1],
+        ]);
+
+        self::assertNotNull($condition);
+        self::assertTrue($this->evaluate($condition, '/foo'), 'сам воркспейс');
+        self::assertTrue($this->evaluate($condition, '/foo/bar'), 'потомок воркспейса');
+        self::assertFalse($this->evaluate($condition, '/foobar'), 'соседний путь с тем же префиксом');
+        self::assertFalse($this->evaluate($condition, '/foobar/baz'));
+        self::assertTrue($this->evaluate($condition, '/'), 'корень — предок воркспейса');
+        self::assertFalse($this->evaluate($condition, '/other'));
+    }
+
+    public function testDenyInsideAllowWinsForDescendantsOnly(): void
+    {
+        $condition = $this->builder()->build('t', 'key', [
+            ['cpath' => '/', 'read' => 1],
+            ['cpath' => '/Secret', 'read' => 0],
+        ]);
+
+        self::assertNotNull($condition);
+        self::assertFalse($this->evaluate($condition, '/Secret'));
+        self::assertFalse($this->evaluate($condition, '/Secret/x'));
+        self::assertTrue($this->evaluate($condition, '/SecretGarden'), 'соседний путь не попадает под запрет');
+        self::assertTrue($this->evaluate($condition, '/Public/x'));
+    }
+
+    public function testElementAboveWorkspaceIsVisible(): void
+    {
+        $condition = $this->builder()->build('t', 'key', [
+            ['cpath' => '/Products_2024/Shoes', 'read' => 1],
+        ]);
+
+        self::assertNotNull($condition);
+        self::assertTrue($this->evaluate($condition, '/Products_2024'), 'папка на пути к воркспейсу');
+        self::assertFalse($this->evaluate($condition, '/Products_2024/Bags'));
+        self::assertFalse($this->evaluate($condition, '/Products_20'), 'префикс без границы сегмента');
+    }
+
+    public function testTrailingSlashInCpathIsNormalised(): void
+    {
+        $withSlash = $this->builder()->build('t', 'key', [['cpath' => '/foo/', 'read' => 1]]);
+        $withoutSlash = $this->builder()->build('t', 'key', [['cpath' => '/foo', 'read' => 1]]);
+
+        self::assertSame($withoutSlash, $withSlash);
     }
 }

@@ -674,7 +674,7 @@ class MutationType extends ObjectType
                         } catch (Exception $e) {
                             return [
                                 'success' => false,
-                                'message' => 'creating failed: ' . $e->getMessage(),
+                                'message' => 'creating failed: ' . self::clientMessage($e),
                             ];
                         }
 
@@ -813,7 +813,7 @@ class MutationType extends ObjectType
                         } catch (Exception $e) {
                             return [
                                 'success' => false,
-                                'message' => $e->getMessage(),
+                                'message' => self::clientMessage($e),
                             ];
                         }
                     },
@@ -1007,7 +1007,7 @@ class MutationType extends ObjectType
                 } catch (\Exception $e) {
                     return [
                         'success' => false,
-                        'message' => 'updating system fields failed: ' . $e->getMessage(),
+                        'message' => 'updating system fields failed: ' . self::clientMessage($e),
                     ];
                 }
 
@@ -1286,7 +1286,7 @@ class MutationType extends ObjectType
             } catch (Exception $e) {
                 return [
                     'success' => false,
-                    'message' => $e->getMessage(),
+                    'message' => self::clientMessage($e),
                 ];
             }
 
@@ -1413,7 +1413,7 @@ class MutationType extends ObjectType
                     } catch (Exception $e) {
                         return [
                             'success' => false,
-                            'message' => 'saving failed: ' . $e->getMessage(),
+                            'message' => 'saving failed: ' . self::clientMessage($e),
                         ];
                     }
 
@@ -1709,7 +1709,7 @@ class MutationType extends ObjectType
                     } catch (Exception $e) {
                         return [
                             'success' => false,
-                            'message' => $e->getMessage(),
+                            'message' => self::clientMessage($e),
                         ];
                     }
 
@@ -1791,7 +1791,7 @@ class MutationType extends ObjectType
                                 'message' => $type . ' ' . $idOrPath . ' deleted',
                             ];
                     } catch (Exception $e) {
-                        $result['message'] = $e->getMessage();
+                        $result['message'] = self::clientMessage($e);
                     }
 
                     return $result;
@@ -1863,7 +1863,7 @@ class MutationType extends ObjectType
                     } catch (Exception $e) {
                         return [
                             'success' => false,
-                            'message' => $e->getMessage(),
+                            'message' => self::clientMessage($e),
                         ];
                     }
                 },
@@ -1964,5 +1964,19 @@ class MutationType extends ObjectType
         if (isset($options['omitVersionCreate']) && $options['omitVersionCreate'] && !$omitVersionCreateBefore) {
             Version::enable();
         }
+    }
+    /**
+     * Текст исключения для потребителя: только ClientAware-безопасные сообщения,
+     * остальное — в лог, клиенту общая формулировка.
+     */
+    private static function clientMessage(\Throwable $e): string
+    {
+        if ($e instanceof \GraphQL\Error\ClientAware && $e->isClientSafe()) {
+            return $e->getMessage();
+        }
+
+        Logger::error($e);
+
+        return OpenDxp::inDebugMode() ? $e->getMessage() : 'Internal server error';
     }
 }

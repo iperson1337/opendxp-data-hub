@@ -18,6 +18,10 @@ namespace OpenDxp\Bundle\DataHubBundle\Controller;
 use Exception;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Error\Warning;
+use GraphQL\Error\ClientAware;
+use GraphQL\Validator\Rules\QueryComplexity;
+use GraphQL\Validator\Rules\QueryDepth;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use GraphQL\GraphQL;
 use GraphQL\Server\RequestError;
 use GraphQL\Validator\DocumentValidator;
@@ -154,7 +158,16 @@ class WebserviceController extends FrontendController
         try {
             $rootValue = null;
 
-            $validators = null;
+            // Ограничения глубины/сложности запроса: 0 в конфиге отключает правило.
+            $validators = DocumentValidator::allRules();
+            $depthLimit = Limits::queryDepth();
+            $complexityLimit = Limits::queryComplexity();
+            if ($depthLimit > 0) {
+                $validators[QueryDepth::class] = new QueryDepth($depthLimit);
+            }
+            if ($complexityLimit > 0) {
+                $validators[QueryComplexity::class] = new QueryComplexity($complexityLimit);
+            }
 
             $event = new ExecutorEvent(
                 $request,
@@ -180,7 +193,12 @@ class WebserviceController extends FrontendController
 
             $disableIntrospection = !$configAllowIntrospection || (isset($configuration->getSecurityConfig()['disableIntrospection']) && $configuration->getSecurityConfig()['disableIntrospection']);
 
-            DocumentValidator::addRule(new DisableIntrospection((int)$disableIntrospection));
+            // Правило передаём в набор валидаторов запроса, а не в глобальный реестр
+            // DocumentValidator::addRule: тот живёт весь процесс и «залипает» между
+            // конфигурациями в worker-режиме.
+            $validators[DisableIntrospection::class] = new DisableIntrospection(
+                $disableIntrospection ? DisableIntrospection::ENABLED : DisableIntrospection::DISABLED
+            );
 
             $result = GraphQL::executeQuery(
                 $event->getSchema(),
@@ -204,10 +222,14 @@ class WebserviceController extends FrontendController
                 $output = $result->toArray();
             }
         } catch (Exception $e) {
+            // Клиенту уходит только текст ClientAware-исключений; всё остальное
+            // (ошибки БД с фрагментами SQL, пути ФС) остаётся в логе.
+            Logger::error($e);
+            $clientSafe = $e instanceof ClientAware && $e->isClientSafe();
             $output = [
                 'errors' => [
                     [
-                        'message' => $e->getMessage(),
+                        'message' => $clientSafe || OpenDxp::inDebugMode() ? $e->getMessage() : 'Internal server error',
                     ],
                 ],
             ];

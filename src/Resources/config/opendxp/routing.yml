@@ -4,9 +4,18 @@ app:
 
 
 admin_opendxpdatahub_config:
-    path: /pimcore-datahub-webservices/explorer/{clientname}
+    path: /opendxp-datahub-webservices/explorer/{clientname}
     defaults: { _controller: OpenDxp\Bundle\DataHubBundle\Controller\GraphQLExplorerController::explorerAction }
 
 admin_opendxpdatahub_webservice:
+    path: /opendxp-graphql-webservices/{clientname}
+    defaults: { _controller: OpenDxp\Bundle\DataHubBundle\Controller\WebserviceController::webonyxAction }
+
+# Legacy aliases (Pimcore data-hub paths) - kept so existing consumers keep working.
+admin_opendxpdatahub_config_legacy:
+    path: /pimcore-datahub-webservices/explorer/{clientname}
+    defaults: { _controller: OpenDxp\Bundle\DataHubBundle\Controller\GraphQLExplorerController::explorerAction }
+
+admin_opendxpdatahub_webservice_legacy:
     path: /pimcore-graphql-webservices/{clientname}
     defaults: { _controller: OpenDxp\Bundle\DataHubBundle\Controller\WebserviceController::webonyxAction }

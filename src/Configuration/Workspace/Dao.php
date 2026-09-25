@@ -47,10 +47,7 @@ class Dao extends Model\Dao\AbstractDao
                 if (is_bool($value)) {
                     $value = (int) $value;
                 }
-                if (!class_exists("\OpenDxp\Db\Connection")) {
-                    $key = $this->db->quoteIdentifier($key);
-                }
-                $data[$key] = $value;
+                $data[$this->db->quoteIdentifier($key)] = $value;
             }
         }
         $this->db->insert($tableName, $data);

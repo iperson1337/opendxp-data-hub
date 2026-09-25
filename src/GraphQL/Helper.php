@@ -15,6 +15,7 @@
 
 namespace OpenDxp\Bundle\DataHubBundle\GraphQL;
 
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException;
 use OpenDxp\Db;
 use OpenDxp\Model\DataObject\ClassDefinition\Data;
 use OpenDxp\Model\DataObject\ClassDefinition\Layout;
@@ -34,29 +35,54 @@ class Helper
      */
     public static function addJoins(&$list, $filter, $columns, &$mappingTable = [])
     {
-        $filterEntries = is_array($filter) ? $filter : [$filter];
-
-        foreach ($filterEntries as $entry) {
-            $parts = get_object_vars($entry);
-
-            foreach ($parts as $key => $value) {
-                foreach ($columns as $column) {
-                    $attributes = $column['attributes'];
-
-                    if (isset($attributes['attribute'])) {
-                        $name = $attributes['attribute'];
-
-                        if (str_contains($name, '~')) {
-                            $nameParts = explode('~', $name);
-                            $brickName = $nameParts[0];
-                            $brickKey = $nameParts[1];
-                            $list->addObjectbrick($brickName);
-                            $mappingTable[$brickKey] = 1;
-                        }
-                    }
-                }
-            }
+        $filterKeys = self::collectFilterKeys($filter);
+        if ($filterKeys === []) {
+            return;
         }
+
+        foreach ($columns as $column) {
+            $attributes = $column['attributes'] ?? [];
+            $name = $attributes['attribute'] ?? null;
+            if (!is_string($name) || !str_contains($name, '~')) {
+                continue;
+            }
+
+            [$brickName, $brickKey] = explode('~', $name, 2);
+            // Джойним brick-таблицу только если фильтр реально обращается к её полю:
+            // раньше при любом фильтре подключались ВСЕ brick'и конфигурации.
+            if (!isset($filterKeys[$brickKey]) && !isset($filterKeys[$name])) {
+                continue;
+            }
+
+            $list->addObjectbrick($brickName);
+            $mappingTable[$brickKey] = 1;
+        }
+    }
+
+    /**
+     * Рекурсивно собирает имена полей, к которым обращается фильтр (без операторов `$…`).
+     *
+     * @param mixed $filter
+     *
+     * @return array<string, true>
+     */
+    private static function collectFilterKeys($filter, array &$keys = []): array
+    {
+        if ($filter instanceof stdClass) {
+            $filter = get_object_vars($filter);
+        }
+        if (!is_array($filter)) {
+            return $keys;
+        }
+
+        foreach ($filter as $key => $value) {
+            if (is_string($key) && !str_starts_with($key, '$')) {
+                $keys[$key] = true;
+            }
+            self::collectFilterKeys($value, $keys);
+        }
+
+        return $keys;
     }
 
     /**
@@ -109,8 +135,9 @@ class Helper
         $db = Db::get();
 
         $parts = [];
-        if (is_string($q)) {
-            return $q;
+        if (!is_array($q) && !$q instanceof stdClass) {
+            // Раньше строка возвращалась в SQL как есть — прямая SQL-инъекция через `filter`.
+            throw new ClientSafeException('invalid filter: expected an object or a list of objects, got ' . get_debug_type($q));
         }
 
         foreach ($q as $key => $value) {
@@ -129,42 +156,40 @@ class Helper
                         );
                     }
                     $parts[] = implode(' ' . $childOp . ' ', $childParts);
+                } elseif ($value instanceof stdClass) {
+                    $parts[] = self::buildSqlCondition($defaultTable, $value, $childOp, $subject, $fieldMappingTable);
                 } else {
-                    $parts[] = self::buildSqlCondition($defaultTable, $value, $childOp);
+                    throw new ClientSafeException('invalid filter: ' . $key . ' expects a list of conditions');
                 }
             } else {
                 if (is_array($value)) {
-                    foreach ($value as $subValue) {
-                        $parts[] = self::buildSqlCondition($defaultTable, $subValue);
+                    $scalars = array_filter($value, static fn ($item) => $item === null || is_scalar($item));
+                    if (count($scalars) === count($value)) {
+                        // Список скаляров — трактуем как `$in`, а не как сырой SQL.
+                        $parts[] = self::buildInCondition($defaultTable, (string) $key, $value, $fieldMappingTable);
+                    } else {
+                        foreach ($value as $subValue) {
+                            if (!$subValue instanceof stdClass) {
+                                throw new ClientSafeException('invalid filter: mixed list for ' . $key);
+                            }
+                            $parts[] = self::buildSqlCondition($defaultTable, $subValue, null, null, $fieldMappingTable);
+                        }
                     }
                 } elseif ($value instanceof stdClass) {
                     $objectVars = get_object_vars($value);
                     foreach ($objectVars as $objectVar => $objectValue) {
                         if ((strtolower((string) $objectVar) === '$in' || strtolower((string) $objectVar) === 'in') && is_array($objectValue)) {
-                            if (empty($objectValue)) {
-                                $parts[] = '(1=0)';
-                            } else {
-                                $quoted = array_map([$db, 'quote'], $objectValue);
-                                $inList = implode(', ', $quoted);
-                                if (isset($fieldMappingTable[$key])) {
-                                    $parts[] = '(' . $db->quoteIdentifier($key) . ' IN (' . $inList . '))';
-                                } else {
-                                    $parts[] = '(' . self::quoteAbsoluteColumnName(
-                                        $defaultTable,
-                                        $key
-                                    ) . ' IN (' . $inList . '))';
-                                }
-                            }
+                            $parts[] = self::buildInCondition($defaultTable, (string) $key, $objectValue, $fieldMappingTable);
                         } elseif (array_search(strtolower((string) $objectVar), $ops) !== false) {
                             $innerOp = $mappingTable[strtolower((string) $objectVar)];
                             if ($innerOp == 'NOT') {
                                 $valuePart = ' IS NULL';
                                 if (!is_null($objectValue)) {
-                                    $valuePart = ' =' . $db->quote($objectValue);
+                                    $valuePart = ' =' . self::quoteScalar($objectValue);
                                 }
 
                                 if (isset($fieldMappingTable[$key])) {
-                                    $parts[] = '( NOT ' . $db->quoteIdentifier($key) . $valuePart . ')';
+                                    $parts[] = '( NOT ' . $db->quoteIdentifier(self::assertColumnName($key)) . $valuePart . ')';
                                 } else {
                                     $parts[] = '( NOT ' . self::quoteAbsoluteColumnName(
                                         $defaultTable,
@@ -175,7 +200,7 @@ class Helper
                                 $parts[] = '(' . self::quoteAbsoluteColumnName(
                                     $defaultTable,
                                     $key
-                                ) . ' ' . $innerOp . ' ' . $db->quote($objectValue) . ')';
+                                ) . ' ' . $innerOp . ' ' . self::quoteScalar($objectValue) . ')';
                             }
                         } else {
                             if ($objectValue instanceof stdClass) {
@@ -190,7 +215,7 @@ class Helper
                                     $parts[] = '(' . self::quoteAbsoluteColumnName(
                                         $defaultTable,
                                         $objectVar
-                                    ) . ' = ' . $db->quote($objectValue) . ')';
+                                    ) . ' = ' . self::quoteScalar($objectValue) . ')';
                                 }
                             }
                         }
@@ -204,19 +229,19 @@ class Helper
                             $parts[] = '(NOT' . self::quoteAbsoluteColumnName(
                                 $defaultTable,
                                 $subject
-                            ) . ' = ' . $db->quote($value) . ')';
+                            ) . ' = ' . self::quoteScalar($value) . ')';
                         } else {
                             $parts[] = '(' . self::quoteAbsoluteColumnName(
                                 $defaultTable,
                                 $subject
-                            ) . ' ' . $innerOp . ' ' . $db->quote($value) . ')';
+                            ) . ' ' . $innerOp . ' ' . self::quoteScalar($value) . ')';
                         }
                     } else {
                         if (isset($fieldMappingTable[$key])) {
                             if (is_null($value)) {
-                                $parts[] = '(' . $db->quoteIdentifier($key) . ' IS NULL)';
+                                $parts[] = '(' . $db->quoteIdentifier(self::assertColumnName($key)) . ' IS NULL)';
                             } else {
-                                $parts[] = '(' . $db->quoteIdentifier($key) . ' = ' . $db->quote($value) . ')';
+                                $parts[] = '(' . $db->quoteIdentifier(self::assertColumnName($key)) . ' = ' . self::quoteScalar($value) . ')';
                             }
                         } else {
                             if (is_null($value)) {
@@ -225,7 +250,7 @@ class Helper
                                 $parts[] = '(' . self::quoteAbsoluteColumnName(
                                     $defaultTable,
                                     $key
-                                ) . ' = ' . $db->quote($value) . ')';
+                                ) . ' = ' . self::quoteScalar($value) . ')';
                             }
                         }
                     }
@@ -246,10 +271,51 @@ class Helper
      */
     protected static function quoteAbsoluteColumnName($defaultTable, $columnName)
     {
+        $columnName = self::assertColumnName($columnName);
         $db = Db::get();
         $absoluteColumnName = (str_contains($columnName, '.')) ? $columnName : $defaultTable . '.' . $columnName;
 
         return $db->quoteIdentifier($absoluteColumnName);
+    }
+
+    /**
+     * Имя колонки фильтра: только буквы, цифры, `_`, опционально `table.column`.
+     * Квотирование идентификатора защищает от выхода из обратных кавычек, но не от
+     * обращения к произвольным колонкам/таблицам с экзотическими именами.
+     */
+    private static function assertColumnName(mixed $columnName): string
+    {
+        if (!is_string($columnName) || !preg_match('/^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)?$/', $columnName)) {
+            throw new ClientSafeException('invalid filter: illegal column name ' . json_encode($columnName));
+        }
+
+        return $columnName;
+    }
+
+    private static function quoteScalar(mixed $value): string
+    {
+        if ($value === null || is_scalar($value)) {
+            return Db::get()->quote(is_bool($value) ? (int) $value : (string) $value);
+        }
+
+        throw new ClientSafeException('invalid filter: scalar value expected, got ' . get_debug_type($value));
+    }
+
+    /**
+     * @param array<int, mixed> $values
+     */
+    private static function buildInCondition(string $defaultTable, string $key, array $values, array $fieldMappingTable): string
+    {
+        if ($values === []) {
+            return '(1=0)';
+        }
+
+        $inList = implode(', ', array_map(self::quoteScalar(...), array_values($values)));
+        $column = isset($fieldMappingTable[$key])
+            ? Db::get()->quoteIdentifier(self::assertColumnName($key))
+            : self::quoteAbsoluteColumnName($defaultTable, $key);
+
+        return '(' . $column . ' IN (' . $inList . '))';
     }
 
     /**

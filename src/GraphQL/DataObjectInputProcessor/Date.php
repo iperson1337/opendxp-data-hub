@@ -18,6 +18,7 @@ namespace OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectInputProcessor;
 use Carbon\Carbon;
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
 use OpenDxp\Model\DataObject\Concrete;
 use OpenDxp\Model\DataObject\Fieldcollection\Data\AbstractData;
@@ -45,7 +46,10 @@ class Date extends Base
 
             if (!is_null($newValue)) {
                 if (!is_numeric($newValue)) {
-                    $newValue = strtotime($newValue);
+                    $newValue = strtotime((string) $newValue);
+                    if ($newValue === false) {
+                        throw new ClientSafeException('invalid date value');
+                    }
                 }
                 $newValue = Carbon::createFromTimestamp($newValue);
             }

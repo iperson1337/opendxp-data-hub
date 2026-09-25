@@ -35,7 +35,11 @@ use Doctrine\DBAL\Connection;
  *  - совпадение ищется в обе стороны: воркспейс — предок объекта и объект — предок
  *    воркспейса;
  *  - сравнение остаётся на `LOCATE(...) = 1`, а не на `LIKE`, чтобы не экранировать
- *    `%`/`_` в путях и не менять поведение на границах сегментов.
+ *    `%`/`_` в путях.
+ *
+ * Отличие от исходных подзапросов: совпадение проверяется по границе сегмента пути
+ * (`/foo` покрывает `/foo` и `/foo/…`, но не `/foobar`), как и PHP-проверка
+ * `WorkspaceHelper::isAllowed`, которая работает по id элемента.
  */
 final class WorkspaceConditionBuilder
 {
@@ -77,6 +81,10 @@ final class WorkspaceConditionBuilder
         $rows = [];
         foreach ($workspaces as $workspace) {
             $cpath = (string) ($workspace['cpath'] ?? '');
+            // Хвостовой слэш из YAML-конфига нормализуем: `/foo/` и `/foo` — один воркспейс.
+            if ($cpath !== '/') {
+                $cpath = rtrim($cpath, '/');
+            }
             if ($cpath === '') {
                 continue;
             }
@@ -108,16 +116,43 @@ final class WorkspaceConditionBuilder
             ($this->quoteIdentifier)($nameColumn),
         );
 
-        // Воркспейс — предок элемента (`cpath` — начало полного пути).
+        $quoteString = $this->quoteString;
+
+        // Воркспейс — предок элемента (или сам элемент). Сравнение по границе сегмента:
+        // `/foo` не должен матчить `/foobar/…` — голый LOCATE(cpath, fullpath) = 1 это допускал.
         $workspaceAboveElement = $this->buildCase(
             $rows,
-            static fn (string $quotedCpath): string => sprintf('LOCATE(%s, %s) = 1', $quotedCpath, $fullpath),
+            static function (string $cpath) use ($fullpath, $quoteString): string {
+                if ($cpath === '/') {
+                    return sprintf('LOCATE(%s, %s) = 1', $quoteString('/'), $fullpath);
+                }
+
+                return sprintf(
+                    '(%1$s = %2$s OR LOCATE(%3$s, %1$s) = 1)',
+                    $fullpath,
+                    $quoteString($cpath),
+                    $quoteString($cpath . '/'),
+                );
+            },
         );
 
-        // Элемент — предок воркспейса (полный путь — начало `cpath`).
+        // Элемент — предок воркспейса: папки на пути к разрешённому воркспейсу видны.
         $elementAboveWorkspace = $this->buildCase(
             $rows,
-            static fn (string $quotedCpath): string => sprintf('LOCATE(%s, %s) = 1', $fullpath, $quotedCpath),
+            static function (string $cpath) use ($fullpath, $quoteString): string {
+                if ($cpath === '/') {
+                    return sprintf('%s = %s', $fullpath, $quoteString('/'));
+                }
+
+                // Корень (`path` = '/', `key` = '') — предок любого воркспейса.
+                return sprintf(
+                    '(%1$s = %3$s OR %1$s = %2$s OR LOCATE(CONCAT(%1$s, %3$s), %4$s) = 1)',
+                    $fullpath,
+                    $quoteString($cpath),
+                    $quoteString('/'),
+                    $quoteString($cpath . '/'),
+                );
+            },
         );
 
         return sprintf('(%s = 1 OR %s = 1)', $workspaceAboveElement, $elementAboveWorkspace);
@@ -146,13 +181,13 @@ final class WorkspaceConditionBuilder
 
     /**
      * @param array<int, array{cpath: string, read: int}> $rows отсортированы по убыванию длины `cpath`
-     * @param callable(string): string $predicate
+     * @param callable(string): string $predicate получает НЕквотированный cpath
      */
     private function buildCase(array $rows, callable $predicate): string
     {
         $whens = [];
         foreach ($rows as $row) {
-            $whens[] = sprintf('WHEN %s THEN %d', $predicate(($this->quoteString)($row['cpath'])), $row['read']);
+            $whens[] = sprintf('WHEN %s THEN %d', $predicate($row['cpath']), $row['read']);
         }
 
         return '(CASE ' . implode(' ', $whens) . ' ELSE 0 END)';

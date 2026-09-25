@@ -94,6 +94,7 @@ class WorkspaceHelper
             return;
         }
 
+        $toDelete = [];
         foreach ($spaces as $spaceIndex => &$space) {
             if (!isset($space['cpath'])) {
                 continue;
@@ -112,22 +113,27 @@ class WorkspaceHelper
                 if ($modificationType === self::MODIFY_TYPE_REPLACE) {
                     $space['cpath'] = $replaceValue;
                 } elseif ($modificationType === self::MODIFY_TYPE_DELETE) {
-                    unset($spaces[$spaceIndex]);
-                    $spaces = array_values($spaces); // reset array keys
+                    $toDelete[] = $spaceIndex;
                 }
-            } elseif (str_contains($cTrailingPath, $cTrailingSearchValue)) {
+            } elseif (str_starts_with($cTrailingPath, $cTrailingSearchValue)) {
 
-                // it's a sub element
+                // it's a sub element (prefix match only: `/a/b/x` must not react to a rename of `/b`)
                 $changed = true;
 
                 if ($modificationType === self::MODIFY_TYPE_REPLACE) {
-                    $space['cpath'] = str_replace($cTrailingSearchValue, $cTrailingReplaceValue, $space['cpath']);
+                    $space['cpath'] = $cTrailingReplaceValue . substr($cTrailingPath, strlen($cTrailingSearchValue));
+                    $space['cpath'] = rtrim($space['cpath'], '/');
                 } elseif ($modificationType === self::MODIFY_TYPE_DELETE) {
-                    unset($spaces[$spaceIndex]);
-                    $spaces = array_values($spaces); // reset array keys
+                    $toDelete[] = $spaceIndex;
                 }
             }
         }
+        unset($space);
+
+        foreach ($toDelete as $spaceIndex) {
+            unset($spaces[$spaceIndex]);
+        }
+        $spaces = array_values($spaces);
 
         if ($changed === false) {
             return;
@@ -264,36 +270,72 @@ class WorkspaceHelper
         }
 
         $elementType = Service::getElementType($element);
+        $elementId = $element->getId();
+
+        $cacheKey = null;
+        if ($elementId) {
+            // Один и тот же элемент проверяется по несколько раз за запрос (edges + edge,
+            // связи, дети): результат держим в runtime-кэше на время запроса.
+            $cacheKey = 'datahub_isallowed_' . $configuration->getName() . '_' . $elementType . '_' . $elementId . '_' . $type;
+            if (RuntimeCache::isRegistered($cacheKey)) {
+                return RuntimeCache::get($cacheKey);
+            }
+        }
+
+        $result = self::computeIsAllowed($element, $configuration, $elementType, $type);
+
+        if ($cacheKey !== null) {
+            RuntimeCache::set($cacheKey, $result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param ElementInterface|OwnerAwareFieldInterface $element
+     */
+    private static function computeIsAllowed($element, Configuration $configuration, string $elementType, string $type): bool
+    {
         // collect properties via parent - ids
         $parentIds = [1];
 
         $parent = $element->getParent();
-        if ($parent) {
-            while ($parent) {
-                $parentIds[] = $parent->getId();
-                $parent = $parent->getParent();
-            }
+        while ($parent) {
+            $parentIds[] = $parent->getId();
+            $parent = $parent->getParent();
         }
         if ($element->getId()) {
             $parentIds[] = $element->getId();
         }
 
         $lookupTable = self::fetchLookupTable($elementType, $configuration);
-        foreach ($parentIds as $parentId) {
-            if (isset($lookupTable[$parentId]) && $lookupTable[$parentId][$type] === 1) {
+
+        // Решает самый глубокий воркспейс на пути от корня к элементу (как в SQL-условии
+        // листинга: `ORDER BY LENGTH(cpath) DESC LIMIT 1`). Раньше срабатывала первая же
+        // строка с флагом 1 — запрет на подпапку не действовал, если выше был allow.
+        $candidates = [];
+        foreach (array_unique($parentIds) as $parentId) {
+            if (isset($lookupTable[$parentId])) {
+                $candidates[] = $lookupTable[$parentId];
+            }
+        }
+        if ($candidates !== []) {
+            usort($candidates, static fn (array $a, array $b): int => strlen((string) $b['cpath']) <=> strlen((string) $a['cpath']));
+            if ((int) ($candidates[0][$type] ?? 0) === 1) {
                 return true;
+            }
+            // Явный запрет самого глубокого воркспейса не перекрывается правилом ниже.
+            if ($type !== 'read') {
+                return false;
             }
         }
 
         if ($type === 'read') {
-            $path = $element->getRealFullPath() . '/';
-            $path = str_replace('_', '\\_', $path);
-            if ($element->getId() === 1) {
-                $path = '/';
-            }
+            // Элемент — предок воркспейса с правом чтения: папку по пути к нему видеть можно.
+            $path = $element->getId() === 1 ? '/' : $element->getRealFullPath() . '/';
 
             foreach ($lookupTable as $row) {
-                if (str_starts_with((string) $row['cpath'], $path) && $row[$type] == 1) {
+                if ((int) ($row[$type] ?? 0) === 1 && str_starts_with((string) $row['cpath'] . '/', $path)) {
                     return true;
                 }
             }

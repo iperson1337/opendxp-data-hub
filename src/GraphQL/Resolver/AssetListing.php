@@ -22,6 +22,7 @@ use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\ListingEvents;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ListingEvent;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\ElementDescriptor;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Helper;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
@@ -56,7 +57,7 @@ class AssetListing
      */
     public function resolveEdges($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
-        return $value['edges'];
+        return is_callable($value['edges']) ? ($value['edges'])() : $value['edges'];
     }
 
     /**
@@ -100,7 +101,12 @@ class AssetListing
         $objectList = $modelFactory->build($listClass);
         $conditionParts = [];
         if (isset($args['ids'])) {
-            $conditionParts[] = '(id IN (' . $args['ids'] . '))';
+            // Раньше строка вставлялась в SQL как есть — прямая инъекция через `ids`.
+            $ids = is_array($args['ids']) ? $args['ids'] : explode(',', (string) $args['ids']);
+            $ids = array_values(array_filter(array_map('trim', $ids), static fn ($id) => $id !== ''));
+            $conditionParts[] = $ids === []
+                ? '(0 = 1)'
+                : '(id IN (' . implode(', ', array_map($db->quote(...), $ids)) . '))';
         }
 
         if (isset($args['fullpaths'])) {
@@ -117,9 +123,7 @@ class AssetListing
         }
 
         // paging
-        if (isset($args['first'])) {
-            $objectList->setLimit($args['first']);
-        }
+        $objectList->setLimit(Limits::first($args['first'] ?? null));
 
         if (isset($args['after'])) {
             $objectList->setOffset($args['after']);
@@ -127,7 +131,7 @@ class AssetListing
 
         // sorting
         if (!empty($args['sortBy'])) {
-            $objectList->setOrderKey($args['sortBy']);
+            $objectList->setOrderKey(Limits::assertSortKeys($args['sortBy']));
             if (!empty($args['sortOrder'])) {
                 $objectList->setOrder($args['sortOrder']);
             }
@@ -155,8 +159,8 @@ class AssetListing
 
         if (isset($args['filter'])) {
             $filter = json_decode($args['filter'], false);
-            if (!$filter) {
-                throw new ClientSafeException('unable to decode filter');
+            if (json_last_error() !== JSON_ERROR_NONE || (!is_array($filter) && !$filter instanceof \stdClass)) {
+                throw new ClientSafeException('unable to decode filter: ' . json_last_error_msg());
             }
             $filterCondition = Helper::buildSqlCondition($tableName, $filter);
             $conditionParts[] = $filterCondition;
@@ -175,24 +179,24 @@ class AssetListing
         /** @var Asset\Listing $objectList */
         $objectList = $event->getListing();
 
-        $totalCount = $objectList->getTotalCount();
-        $objectList = $objectList->load();
+        // Ленивые edges/totalCount, как у объектов: COUNT(*) выполняется только если поле запрошено.
+        $connection = [];
+        $connection['edges'] = static function () use ($objectList): array {
+            $nodes = [];
+            foreach ($objectList->load() as $element) {
+                if (!WorkspaceHelper::checkPermission($element, 'read')) {
+                    continue;
+                }
 
-        $nodes = [];
-
-        foreach ($objectList as $element) {
-            if (!WorkspaceHelper::checkPermission($element, 'read')) {
-                continue;
+                $nodes[] = [
+                    'cursor' => 'asset-' . $element->getId(),
+                    'node' => $element,
+                ];
             }
 
-            $nodes[] = [
-                'cursor' => 'asset-' . $element->getId(),
-                'node' => $element,
-            ];
-        }
-        $connection = [];
-        $connection['edges'] = $nodes;
-        $connection['totalCount'] = $totalCount;
+            return $nodes;
+        };
+        $connection['totalCount'] = [$objectList, 'getTotalCount'];
 
         return $connection;
     }
@@ -206,7 +210,7 @@ class AssetListing
      */
     public function resolveListingTotalCount($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
-        return $value['totalCount'];
+        return is_callable($value['totalCount']) ? ($value['totalCount'])() : $value['totalCount'];
     }
 
     /**

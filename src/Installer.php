@@ -33,6 +33,20 @@ class Installer extends SettingsStoreAwareInstaller
 
     const DATAHUB_ADMIN_PERMISSION = 'plugin_datahub_admin';
 
+    /**
+     * Same DDL as Migrations\PimcoreX\Version20260126120000
+     */
+    private const API_KEYS_TABLE_DDL = "
+        CREATE TABLE IF NOT EXISTS `plugin_datahub_api_keys` (
+            `config_name` VARCHAR(80) NOT NULL,
+            `api_keys` JSON NOT NULL,
+            `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (`config_name`)
+        )
+        COLLATE='utf8mb4_general_ci'
+        ENGINE=InnoDB
+    ";
+
     #[Override]
     public function needsReloadAfterInstall(): bool
     {
@@ -68,6 +82,8 @@ class Installer extends SettingsStoreAwareInstaller
                     ;
                 ");
             }
+
+            $db->executeQuery(self::API_KEYS_TABLE_DDL);
         } catch (Exception $e) {
             Logger::warn($e);
 
@@ -75,6 +91,30 @@ class Installer extends SettingsStoreAwareInstaller
         }
 
         parent::install();
+    }
+
+    #[Override]
+    public function uninstall(): void
+    {
+        try {
+            $db = Db::get();
+
+            foreach (['document', 'asset', 'object'] as $type) {
+                $db->executeQuery('DROP TABLE IF EXISTS `plugin_datahub_workspaces_' . $type . '`');
+            }
+            $db->executeQuery('DROP TABLE IF EXISTS `plugin_datahub_api_keys`');
+
+            $db->executeStatement(
+                'DELETE FROM `users_permission_definitions` WHERE `key` IN (?, ?, ?)',
+                [ConfigController::CONFIG_NAME, self::DATAHUB_ADAPTER_PERMISSION, self::DATAHUB_ADMIN_PERMISSION]
+            );
+        } catch (Exception $e) {
+            Logger::warn($e);
+
+            throw new InstallationException($e->getMessage());
+        }
+
+        parent::uninstall();
     }
 
     #[Override]
@@ -96,8 +136,9 @@ class Installer extends SettingsStoreAwareInstaller
         return parent::isInstalled();
     }
 
+    #[Override]
     public function getLastMigrationVersionClassName(): ?string
     {
-        return null;
+        return \OpenDxp\Bundle\DataHubBundle\Migrations\PimcoreX\Version20260126120000::class;
     }
 }

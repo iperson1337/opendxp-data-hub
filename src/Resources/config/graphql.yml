@@ -196,8 +196,6 @@ services:
 
   OpenDxp\Bundle\DataHubBundle\GraphQL\General\AnyDocumentTargetType: ~
 
-  OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\ImageDataType: ~
-
   OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\LinkDataType: ~
 
   OpenDxp\Bundle\DataHubBundle\GraphQL\DocumentElementType\AreablockDataType: ~

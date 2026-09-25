@@ -43,6 +43,9 @@ class AssetType
     public function resolveTag($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
 
         if ($asset) {
             $result = $this->getTags('asset', $asset->getId());
@@ -66,6 +69,9 @@ class AssetType
     public function resolveMetadata($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
         $metadata = $asset?->getMetadata(raw: true);
         if (!$metadata) {
             return null;
@@ -146,6 +152,9 @@ class AssetType
     public function resolvePath($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
         $thumbNailConfig = $args['thumbnail'] ?? null;
         $thumbNailFormat = $args['format'] ?? null;
         $deferred = $args['deferred'] ?? false;
@@ -170,6 +179,9 @@ class AssetType
     public function resolveData($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
         $thumbNailConfig = $args['thumbnail'] ?? null;
         $thumbNailFormat = $args['format'] ?? null;
         $deferred = $args['deferred'] ?? false;
@@ -195,6 +207,9 @@ class AssetType
     public function resolveSrcSet($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
         $thumbNailConfig = $args['thumbnail'] ?? null;
         $thumbNailFormat = $args['format'] ?? null;
         $deferred = $args['deferred'] ?? null;
@@ -264,6 +279,9 @@ class AssetType
 
             /** @var Asset\Image $asset */
             $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
             $thumbnail = $assetFieldHelper->getAssetThumbnail($asset, $thumbnailName, $thumbnailFormat);
             if (isset($thumbnail)) {
                 $thumbnailConfig = $thumbnail->getConfig();
@@ -298,6 +316,9 @@ class AssetType
         if ($value instanceof ElementDescriptor) {
             $thumbnailName = $args['thumbnail'] ?? null;
             $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
 
             // Дальше имя уходит в Asset::getThumbnail()/getImageThumbnail() напрямую,
             // мимо getAssetThumbnail() — сверяем регистр здесь.
@@ -356,6 +377,9 @@ class AssetType
         }
 
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
 
         if (!$asset instanceof Asset\Video) {
             return null;
@@ -389,6 +413,9 @@ class AssetType
     public function resolveFocalPoints(?ElementDescriptor $value = null, array $context = []): ?array
     {
         $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset) {
+            return null;
+        }
 
         if (!$asset instanceof Asset\Image) {
             return null;

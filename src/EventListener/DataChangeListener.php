@@ -17,6 +17,7 @@ namespace OpenDxp\Bundle\DataHubBundle\EventListener;
 
 use OpenDxp\Bundle\DataHubBundle\Configuration;
 use OpenDxp\Bundle\DataHubBundle\WorkspaceHelper;
+use OpenDxp\Cache;
 use OpenDxp\Event\AssetEvents;
 use OpenDxp\Event\DataObjectEvents;
 use OpenDxp\Event\DocumentEvents;
@@ -46,6 +47,7 @@ class DataChangeListener implements EventSubscriberInterface
      */
     public function onObjectUpdate(DataObjectEvent $e)
     {
+        $this->invalidateOutputCache();
         if (!$e->hasArgument('oldPath')) {
             return;
         }
@@ -61,6 +63,7 @@ class DataChangeListener implements EventSubscriberInterface
      */
     public function onObjectDelete(DataObjectEvent $e)
     {
+        $this->invalidateOutputCache();
         $object = $e->getObject();
 
         $this->checkConfiguration(WorkspaceHelper::MODIFY_SPACE_OBJECT, WorkspaceHelper::MODIFY_TYPE_DELETE, $object->getRealFullPath(), null);
@@ -71,6 +74,7 @@ class DataChangeListener implements EventSubscriberInterface
      */
     public function onDocumentUpdate(DocumentEvent $e)
     {
+        $this->invalidateOutputCache();
         if (!$e->hasArgument('oldPath')) {
             return;
         }
@@ -86,6 +90,7 @@ class DataChangeListener implements EventSubscriberInterface
      */
     public function onDocumentDelete(DocumentEvent $e)
     {
+        $this->invalidateOutputCache();
         $object = $e->getDocument();
 
         $this->checkConfiguration(WorkspaceHelper::MODIFY_SPACE_DOCUMENT, WorkspaceHelper::MODIFY_TYPE_DELETE, $object->getRealFullPath(), null);
@@ -96,6 +101,7 @@ class DataChangeListener implements EventSubscriberInterface
      */
     public function onAssetUpdate(AssetEvent $e)
     {
+        $this->invalidateOutputCache();
         if (!$e->hasArgument('oldPath')) {
             return;
         }
@@ -111,6 +117,7 @@ class DataChangeListener implements EventSubscriberInterface
      */
     public function onAssetDelete(AssetEvent $e)
     {
+        $this->invalidateOutputCache();
         $asset = $e->getAsset();
 
         $this->checkConfiguration(WorkspaceHelper::MODIFY_SPACE_ASSET, WorkspaceHelper::MODIFY_TYPE_DELETE, $asset->getRealFullPath(), null);
@@ -144,10 +151,20 @@ class DataChangeListener implements EventSubscriberInterface
             }
 
             try {
-                $entity->save();
+                // Событие приходит и без админ-пользователя (мутация GraphQL, CLI):
+                // обычный save() упал бы на проверке isAllowed('update').
+                $entity->saveAsSystem();
             } catch (Throwable $e) {
                 throw new ValidationException(sprintf('Could not save configuration: %s', $e->getMessage()), 0, $e);
             }
         }
+    }
+    /**
+     * Output cache GraphQL живёт по тегу `datahub`; без инвалидации свежесть данных
+     * определял только TTL, а изменённый элемент отдавался устаревшим.
+     */
+    private function invalidateOutputCache(): void
+    {
+        Cache::clearTags(['datahub']);
     }
 }

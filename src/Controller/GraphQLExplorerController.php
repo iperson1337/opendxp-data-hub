@@ -15,7 +15,6 @@
 
 namespace OpenDxp\Bundle\DataHubBundle\Controller;
 
-use DateTime;
 use Exception;
 use OpenDxp\Bundle\DataHubBundle\Service\CheckConsumerPermissionsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,8 +47,9 @@ class GraphQLExplorerController extends AbstractController
             'tokenHeader' => CheckConsumerPermissionsService::TOKEN_HEADER,
         ]);
 
-        $response->setPublic();
-        $response->setExpires(new DateTime('tomorrow'));
+        // Страница получает apikey из URL: никакого промежуточного кэширования.
+        $response->setPrivate();
+        $response->headers->set('Cache-Control', 'private, no-store, max-age=0');
 
         return $response;
     }

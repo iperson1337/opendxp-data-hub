@@ -42,11 +42,19 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('allow_introspection')->info('enables introspection for graphql. It is enabled by default')->defaultValue(true)->end()
                         ->booleanNode('allow_sqlObjectCondition')
                             ->setDeprecated(
-                                'open-dxp/data-hub-bundle',
+                                'iperson1337/opendxp-data-hub',
                                 '1.0.0'
                             )
                             ->info('enables SQL Condition for graphql. It is enabled by default')
                             ->defaultValue(true)
+                        ->end()
+                        ->integerNode('query_depth_limit')->info('Maximum GraphQL query depth, 0 disables')->defaultValue(15)->end()
+                        ->integerNode('query_complexity_limit')->info('Maximum GraphQL query complexity, 0 disables')->defaultValue(1000)->end()
+                        ->integerNode('max_first')->info('Maximum value of the first argument in listings')->defaultValue(1000)->end()
+                        ->arrayNode('cors_origins')
+                            ->info('Allowed CORS origins; empty means Access-Control-Allow-Origin: * without credentials')
+                            ->defaultValue([])
+                            ->scalarPrototype()->end()
                         ->end()
                     ->end()
                 ->end()

@@ -24,6 +24,7 @@ use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ListingEvent;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\ElementDescriptor;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Helper;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ElementIdentificationTrait;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\PermissionInfoTrait;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
@@ -295,9 +296,17 @@ class QueryType
             foreach ($additionalProvided as $field) {
                 $method = 'getBy' . ucfirst($field);
                 if (is_callable([$classFqn, $method])) {
+                    // getBy<Field>($value, 1) отдаёт один объект (или Listing/массив в старых ядрах),
+                    // а не массив — прежняя проверка is_array делала ветку мёртвой.
                     $res = $classFqn::$method($args[$field], 1);
-                    if (is_array($res) && !empty($res)) {
-                        $object = $res[0];
+                    if ($res instanceof AbstractObject) {
+                        $object = $res;
+                    } elseif ($res instanceof Listing) {
+                        $object = $res->current() ?: null;
+                    } elseif (is_array($res) && $res !== []) {
+                        $object = reset($res);
+                    }
+                    if ($object) {
                         break;
                     }
                 }
@@ -316,7 +325,7 @@ class QueryType
         $conditionParts = [];
 
         if ($isIdSet) {
-            $conditionParts[] = '(id =' . $args['id'] . ')';
+            $conditionParts[] = '(id = ' . (int) $args['id'] . ')';
         }
 
         if ($isFullpathSet) {
@@ -494,9 +503,7 @@ class QueryType
         }
 
         // paging
-        if (isset($args['first'])) {
-            $objectList->setLimit($args['first']);
-        }
+        $objectList->setLimit(Limits::first($args['first'] ?? null));
 
         if (isset($args['after'])) {
             $objectList->setOffset($args['after']);
@@ -504,7 +511,7 @@ class QueryType
 
         // sorting
         if (!empty($args['sortBy'])) {
-            $objectList->setOrderKey($args['sortBy']);
+            $objectList->setOrderKey(Limits::assertSortKeys($args['sortBy']));
             if (!empty($args['sortOrder'])) {
                 $objectList->setOrder($args['sortOrder']);
             }
@@ -540,15 +547,14 @@ class QueryType
 
         if (isset($args['filter'])) {
             $filter = json_decode($args['filter'], false);
-            if (!$filter) {
-                $jsonError = json_last_error_msg();
+            if (json_last_error() !== JSON_ERROR_NONE || (!is_array($filter) && !$filter instanceof \stdClass)) {
                 throw new ClientSafeException(
-                    'unable to decode filter. Filter must be valid JSON (use double-quoted keys, e.g. {"barcode": {"$in": ["123"]}}). JSON error: ' . $jsonError
+                    'unable to decode filter. Filter must be a valid JSON object (use double-quoted keys, e.g. {"barcode": {"$in": ["123"]}}). JSON error: ' . json_last_error_msg()
                 );
             }
 
             $className = $this->class->getName();
-            $columns = $this->configuration->configuration['schema']['queryEntities'][$className]['columnConfig']['columns'];
+            $columns = $this->configuration->configuration['schema']['queryEntities'][$className]['columnConfig']['columns'] ?? [];
 
             Helper::addJoins($objectList, $filter, $columns, $mappingTable);
 

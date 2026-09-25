@@ -25,12 +25,20 @@ Configuration takes place in the endpoint configuration and offers following pos
 ## External Access
 The standard endpoint is
 ```
-/opendxp-graphql-webservices/{configurationname}?apikey={yourApiKey}
+/opendxp-graphql-webservices/{configurationname}
+```
+The legacy endpoint `/pimcore-graphql-webservices/{configurationname}` is still served for backwards compatibility.
+
+The API key should be passed via the `X-API-Key` HTTP header:
+```
+POST /opendxp-graphql-webservices/blogdemo
+X-API-Key: 123456
 ```
 So if your configuration name is blogdemo and your apikey 123456 then your endpoint would be
-```
-/opendxp-graphql-webservices/blogdemo?apikey=123456
-```
+`/opendxp-graphql-webservices/blogdemo` with the header `X-API-Key: 123456`.
+
+> **Deprecated:** passing the API key as query parameter (`/opendxp-graphql-webservices/blogdemo?apikey=123456`)
+> is still supported but deprecated, since the key ends up in server logs and browser history. Use the `X-API-Key` header instead.
 Here is a configuration how to [override the standard endpoint](./01_Configuration/15_Customize_Endpoint_URL.md)
 
 ## Queries

@@ -14,6 +14,7 @@ opendxp.plugin.datahub.adapter.abstract = Class.create({
         if (button == "ok" && value.length > 2 && value.length <= 80 && regresult == value) {
             Ext.Ajax.request({
                 url: "/admin/opendxpdatahub/config/add",
+                method: "POST",
                 params: {
                     name: value,
                     type: type
@@ -54,6 +55,7 @@ opendxp.plugin.datahub.adapter.abstract = Class.create({
         if (button == "ok" && value.length > 2 && value.length <= 80 && regresult == value) {
             Ext.Ajax.request({
                 url: "/admin/opendxpdatahub/config/clone",
+                method: "POST",
                 params: {
                     name: value,
                     originalName: record.data.id
@@ -85,6 +87,7 @@ opendxp.plugin.datahub.adapter.abstract = Class.create({
             if (btn == 'yes') {
                 Ext.Ajax.request({
                     url: "/admin/opendxpdatahub/config/delete",
+                method: "POST",
                     params: {
                         name: record.data.id
                     }

@@ -20,6 +20,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\ListingEvents;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ListingEvent;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\ElementDescriptor;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -76,16 +77,14 @@ class TranslationListing
 
         // sorting
         if (!empty($args['sortBy'])) {
-            $list->setOrderKey($args['sortBy']);
+            $list->setOrderKey(Limits::assertSortKeys($args['sortBy']));
             if (!empty($args['sortOrder'])) {
                 $list->setOrder($args['sortOrder']);
             }
         }
 
         // paging
-        if (isset($args['first'])) {
-            $list->setLimit($args['first']);
-        }
+        $list->setLimit(Limits::first($args['first'] ?? null));
 
         if (isset($args['after'])) {
             $list->setOffset($args['after']);
