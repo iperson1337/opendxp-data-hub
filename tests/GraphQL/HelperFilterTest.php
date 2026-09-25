@@ -24,6 +24,30 @@ use PHPUnit\Framework\TestCase;
  */
 class HelperFilterTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Квотирование как у PDO MySQL, без реального соединения.
+        Helper::useConnection(new class {
+            public function quote(mixed $value): string
+            {
+                return "'" . addcslashes((string) $value, "\\'\0\n\r\"\x1a") . "'";
+            }
+
+            public function quoteIdentifier(string $identifier): string
+            {
+                return implode('.', array_map(
+                    static fn (string $part): string => '`' . str_replace('`', '``', $part) . '`',
+                    explode('.', $identifier)
+                ));
+            }
+        });
+    }
+
+    protected function tearDown(): void
+    {
+        Helper::useConnection(null);
+    }
+
     private function build(string $json): string
     {
         return Helper::buildSqlCondition('objects', json_decode($json, false, 512, JSON_THROW_ON_ERROR));

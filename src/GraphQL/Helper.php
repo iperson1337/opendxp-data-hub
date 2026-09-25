@@ -28,6 +28,22 @@ use stdClass;
 class Helper
 {
     /**
+     * Подменяемое соединение для юнит-тестов: `Db::get()` требует поднятого контейнера.
+     * Нужны только методы `quote(string): string` и `quoteIdentifier(string): string`.
+     */
+    private static ?object $connection = null;
+
+    public static function useConnection(?object $connection): void
+    {
+        self::$connection = $connection;
+    }
+
+    private static function getDb(): object
+    {
+        return self::$connection ?? Db::get();
+    }
+
+    /**
      * @param Listing\Concrete $list
      * @param stdClass|array $filter
      * @param array $columns
@@ -132,7 +148,7 @@ class Helper
         ];
         $ops = array_keys($mappingTable);
 
-        $db = Db::get();
+        $db = self::getDb();
 
         $parts = [];
         if (!is_array($q) && !$q instanceof stdClass) {
@@ -272,7 +288,7 @@ class Helper
     protected static function quoteAbsoluteColumnName($defaultTable, $columnName)
     {
         $columnName = self::assertColumnName($columnName);
-        $db = Db::get();
+        $db = self::getDb();
         $absoluteColumnName = (str_contains($columnName, '.')) ? $columnName : $defaultTable . '.' . $columnName;
 
         return $db->quoteIdentifier($absoluteColumnName);
@@ -295,7 +311,7 @@ class Helper
     private static function quoteScalar(mixed $value): string
     {
         if ($value === null || is_scalar($value)) {
-            return Db::get()->quote(is_bool($value) ? (int) $value : (string) $value);
+            return self::getDb()->quote(is_bool($value) ? (int) $value : (string) $value);
         }
 
         throw new ClientSafeException('invalid filter: scalar value expected, got ' . get_debug_type($value));
@@ -312,7 +328,7 @@ class Helper
 
         $inList = implode(', ', array_map(self::quoteScalar(...), array_values($values)));
         $column = isset($fieldMappingTable[$key])
-            ? Db::get()->quoteIdentifier(self::assertColumnName($key))
+            ? self::getDb()->quoteIdentifier(self::assertColumnName($key))
             : self::quoteAbsoluteColumnName($defaultTable, $key);
 
         return '(' . $column . ' IN (' . $inList . '))';

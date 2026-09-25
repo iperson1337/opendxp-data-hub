@@ -13,15 +13,11 @@
  */
 
 // Юнит-тесты бандла не требуют ядра OpenDXP: если оно не установлено (composer install
-// только с dev-зависимостями), подставляются минимальные заглушки из tests/Stubs.
+// только с dev-зависимостями), подставляется заглушка интерфейса webonyx из tests/Stubs.
 
 $autoload = __DIR__ . '/../vendor/autoload.php';
 if (is_file($autoload)) {
     require $autoload;
-}
-
-if (!class_exists(\OpenDxp\Db::class)) {
-    require __DIR__ . '/Stubs/Db.php';
 }
 
 if (!interface_exists(\GraphQL\Error\ClientAware::class)) {
