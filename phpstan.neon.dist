@@ -1,0 +1,15 @@
+# PHPStan configuration for OpenDXP DataHub.
+#
+# NOTE: static analysis requires the OpenDXP core (open-dxp/opendxp) and the
+# admin bundle (open-dxp/admin-bundle) to be installed, since most classes in
+# src/ extend or type-hint against core classes. Run `composer install` first;
+# autoloading is bootstrapped via vendor/autoload.php.
+parameters:
+    level: 5
+    paths:
+        - src
+        - tests
+    bootstrapFiles:
+        - vendor/autoload.php
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false

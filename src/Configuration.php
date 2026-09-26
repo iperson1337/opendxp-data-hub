@@ -239,6 +239,28 @@ class Configuration extends AbstractModel
             throw new Exception('Permissions missing to save the configuration');
         }
 
+        $this->doSave();
+    }
+
+    /**
+     * Saves the configuration without checking the permissions of the current user.
+     * Intended for system-triggered saves (e.g. event listeners reacting to element changes)
+     * where no admin user is available. Never call this with user-submitted data.
+     *
+     * @internal
+     *
+     * @throws Exception
+     */
+    public function saveAsSystem(): void
+    {
+        $this->doSave();
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function doSave(): void
+    {
         $event = new GenericEvent($this);
         $event->setArgument('configuration', $this);
         OpenDxp::getEventDispatcher()->dispatch($event, ConfigurationEvents::CONFIGURATION_PRE_SAVE);

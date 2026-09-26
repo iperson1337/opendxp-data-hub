@@ -15,7 +15,6 @@
 
 namespace OpenDxp\Bundle\DataHubBundle\Controller;
 
-use App\Service\DataHub\ApiKeyService;
 use Exception;
 use OpenDxp;
 use OpenDxp\Bundle\DataHubBundle\ConfigEvents;
@@ -23,7 +22,9 @@ use OpenDxp\Bundle\DataHubBundle\Configuration;
 use OpenDxp\Bundle\DataHubBundle\Event\AdminEvents;
 use OpenDxp\Bundle\DataHubBundle\Event\Config\SpecialEntitiesEvent;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
+use OpenDxp\Bundle\DataHubBundle\Installer;
 use OpenDxp\Bundle\DataHubBundle\Model\SpecialEntitySetting;
+use OpenDxp\Bundle\DataHubBundle\Service\ApiKeyServiceInterface;
 use OpenDxp\Bundle\DataHubBundle\Service\ExportService;
 use OpenDxp\Bundle\DataHubBundle\Service\ImportService;
 use OpenDxp\Bundle\DataHubBundle\WorkspaceHelper;
@@ -47,7 +48,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
     public const CONFIG_NAME = 'plugin_datahub_config';
 
     public function __construct(
-        private readonly ApiKeyService $apiKeyService
+        private readonly ApiKeyServiceInterface $apiKeyService
     ) {
     }
 
@@ -132,7 +133,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
     /**
      * @throws ConfigWriteException
      */
-    #[Route('/delete')]
+    #[Route('/delete', methods: ['POST'])]
     public function deleteAction(Request $request): ?JsonResponse
     {
         $this->checkPermission(self::CONFIG_NAME);
@@ -142,7 +143,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         }
 
         try {
-            $name = $request->query->getString('name');
+            $name = $request->request->getString('name');
 
             $config = Configuration::getByName($name);
             if (!$config instanceof Configuration) {
@@ -170,7 +171,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
     /**
      * @throws ConfigWriteException
      */
-    #[Route('/add')]
+    #[Route('/add', methods: ['POST'])]
     public function addAction(Request $request): ?JsonResponse
     {
         $this->checkPermission(self::CONFIG_NAME);
@@ -180,9 +181,9 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         }
 
         try {
-            $path = $request->query->getString('path');
-            $name = $request->query->getString('name');
-            $type = $request->query->getString('type');
+            $path = $request->request->getString('path');
+            $name = $request->request->getString('name');
+            $type = $request->request->getString('type');
 
             $currentUser = Admin::getCurrentUser();
             if (!$currentUser || !$currentUser->isAdmin()) {
@@ -204,20 +205,20 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         }
     }
 
-    #[Route('/clone')]
+    #[Route('/clone', methods: ['POST'])]
     public function cloneAction(Request $request): ?JsonResponse
     {
         $this->checkPermission(self::CONFIG_NAME);
 
         try {
-            $name = $request->query->getString('name');
+            $name = $request->request->getString('name');
 
             $config = Configuration::getByName($name);
             if ($config instanceof Configuration) {
                 throw new Exception('Name already exists.');
             }
 
-            $originalName = $request->query->getString('originalName');
+            $originalName = $request->request->getString('originalName');
             $originalConfig = Configuration::getByName($originalName);
             if (!$originalConfig) {
                 throw new Exception('Configuration not found');
@@ -427,6 +428,14 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
                 throw new Exception('The configuration was modified during editing, please reload the configuration and make your changes again');
             }
 
+            // Only datahub administrators may change security settings, workspaces or SQL conditions
+            if (!$this->isDatahubAdmin() && $this->restrictedSectionsChanged($name, $configuration ?: [], $dataDecoded)) {
+                return $this->json(
+                    ['success' => false, 'message' => 'Only Datahub administrators may change security settings, workspaces or SQL conditions'],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
             $dataDecoded['general']['modificationDate'] = time();
 
             $keys = ['queryEntities', 'mutationEntities'];
@@ -457,11 +466,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
 
             // Handle API keys: save to database and remove from configuration
             if (isset($dataDecoded['security']['apikey'])) {
-                $apiKeysString = $dataDecoded['security']['apikey'] ?? '';
-                $apiKeys = array_values(array_filter(
-                    array_map('trim', explode("\n", trim($apiKeysString, "\n"))),
-                    fn($key) => $key !== ''
-                ));
+                $apiKeys = $this->parseApiKeys($dataDecoded['security']['apikey']);
 
                 if (!empty($apiKeys)) {
                     $this->apiKeyService->saveApiKeys($name, $apiKeys);
@@ -484,6 +489,120 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         } catch (Exception $e) {
             return $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    private function isDatahubAdmin(): bool
+    {
+        $user = Admin::getCurrentUser();
+        if (!$user) {
+            return false;
+        }
+
+        return $user->isAdmin() || $user->isAllowed(Installer::DATAHUB_ADMIN_PERMISSION);
+    }
+
+    /**
+     * Compares the security block, the workspaces and general.sqlObjectCondition of the stored
+     * configuration with the submitted one.
+     */
+    private function restrictedSectionsChanged(string $name, array $existing, array $submitted): bool
+    {
+        $existingSecurity = $existing['security'] ?? [];
+        $existingSecurity['apikey'] = $this->apiKeyService->getApiKeys($name);
+
+        $submittedSecurity = $submitted['security'] ?? [];
+        $submittedSecurity['apikey'] = $this->parseApiKeys($submittedSecurity['apikey'] ?? []);
+
+        $pairs = [
+            [$this->normalizeSecurity($existingSecurity), $this->normalizeSecurity($submittedSecurity)],
+            [$this->normalizeWorkspaces($existing['workspaces'] ?? []), $this->normalizeWorkspaces($submitted['workspaces'] ?? [])],
+            [
+                (string) ($existing['general']['sqlObjectCondition'] ?? ''),
+                (string) ($submitted['general']['sqlObjectCondition'] ?? ''),
+            ],
+        ];
+
+        foreach ($pairs as [$before, $after]) {
+            if ($this->normalize($before) !== $this->normalize($after)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function normalizeSecurity(array $security): array
+    {
+        $keys = is_array($security['apikey'] ?? null) ? $security['apikey'] : [];
+        sort($keys);
+
+        return [
+            'method' => (string) ($security['method'] ?? ''),
+            'skipPermissionCheck' => (bool) ($security['skipPermissionCheck'] ?? false),
+            'disableIntrospection' => (bool) ($security['disableIntrospection'] ?? false),
+            'apikey' => array_values($keys),
+        ];
+    }
+
+    private function normalizeWorkspaces(array $workspaces): array
+    {
+        $result = [];
+        foreach (['document', 'asset', 'object'] as $type) {
+            $rows = [];
+            foreach ((array) ($workspaces[$type] ?? []) as $space) {
+                if (!is_array($space)) {
+                    continue;
+                }
+                $rows[] = [
+                    'cpath' => (string) ($space['cpath'] ?? ''),
+                    'create' => (bool) ($space['create'] ?? false),
+                    'read' => (bool) ($space['read'] ?? false),
+                    'update' => (bool) ($space['update'] ?? false),
+                    'delete' => (bool) ($space['delete'] ?? false),
+                ];
+            }
+            usort($rows, static fn (array $a, array $b): int => json_encode($a) <=> json_encode($b));
+            $result[$type] = $rows;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Recursively ksorts arrays and returns a canonical JSON representation.
+     */
+    private function normalize(mixed $value): string
+    {
+        if (is_array($value)) {
+            foreach ($value as $k => $v) {
+                $value[$k] = is_array($v) ? json_decode($this->normalize($v), true) : $v;
+            }
+            if (!array_is_list($value)) {
+                ksort($value);
+            }
+        }
+
+        return (string) json_encode($value);
+    }
+
+    /**
+     * Accepts the textarea value (newline separated) or an array and returns a clean key list.
+     *
+     * @return string[]
+     */
+    private function parseApiKeys(mixed $apiKeys): array
+    {
+        if (is_string($apiKeys)) {
+            $apiKeys = explode("\n", $apiKeys);
+        }
+        if (!is_array($apiKeys)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map(static fn ($key): string => is_scalar($key) ? trim((string) $key) : '', $apiKeys),
+            static fn (string $key): bool => $key !== ''
+        ));
     }
 
     /**

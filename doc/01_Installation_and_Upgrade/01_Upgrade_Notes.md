@@ -1,7 +1,7 @@
 # Upgrade Notes
 
-## Migrating from `pimcore/data-hub` to `open-dxp/data-hub-bundle`
-* Renamed bundle to `OpenDxpDataHubBundle` (composer package: `open-dxp/data-hub-bundle`)
+## Migrating from `pimcore/data-hub` to `iperson1337/opendxp-data-hub`
+* Renamed bundle to `OpenDxpDataHubBundle` (composer package: `iperson1337/opendxp-data-hub`)
 * Renamed top-level PHP namespace to `OpenDxp\Bundle\DataHubBundle`
 * Renamed top-level config node to `opendxp_data_hub`
 * Deprecations

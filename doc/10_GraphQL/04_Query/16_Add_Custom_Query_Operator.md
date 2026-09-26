@@ -16,14 +16,14 @@ Add a section similar to this one to your `services.yml` file.
 ```
 
 For reference, have a look at a look at the 
-[`Trimmer operator`](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/GraphQL/Query/Operator/Trimmer.php).
+[`Trimmer operator`](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/GraphQL/Query/Operator/Trimmer.php).
 
 ### Operator Implementation
 
 You have to provide both JavaScript code dealing with the UI configuration aspects specific to  your operator
 and the server-side PHP implementation doing the actual calculations. 
 
-A JS sample can be found [here](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/Resources/public/js/queryoperator/Trimmer.js). 
+A JS sample can be found [here](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/Resources/public/js/queryoperator/Trimmer.js). 
 
 :::info
 
@@ -35,7 +35,7 @@ Make sure, that your extension gets loaded. See [OpenDxp Bundles](https://docs.o
 docs page for further details.
 
 Next thing is to provide the server-side implementation.
-A sample can be found [here](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/GraphQL/Query/Operator/Trimmer.php). 
+A sample can be found [here](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/GraphQL/Query/Operator/Trimmer.php). 
 
 Finally, we have to define how the operator instances get created.
 In most cases we use the `DefaultOperatorFactory` for that:

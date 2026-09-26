@@ -4,11 +4,11 @@ Datahub GraphQL events are based on the Symfony event dispatcher, and are trigge
 [Read more](https://docs.opendxp.io/docs/core-framework/Extending_OpenDxp/Event_API_and_Event_Manager) about events on OpenDxp documentation.
 
 All Datahub events are defined as a constant on component classes:
-- [Query](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/Event/GraphQL/QueryEvents.php)
-- [Mutation](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/Event/GraphQL/MutationEvents.php)
-- [Executor](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/Event/GraphQL/ExecutorEvents.php)
-- [Listing](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/Event/GraphQL/ListingEvents.php)
-- [Ouput cache](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/Event/GraphQL/OutputCacheEvents.php)
+- [Query](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/Event/GraphQL/QueryEvents.php)
+- [Mutation](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/Event/GraphQL/MutationEvents.php)
+- [Executor](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/Event/GraphQL/ExecutorEvents.php)
+- [Listing](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/Event/GraphQL/ListingEvents.php)
+- [Ouput cache](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/Event/GraphQL/OutputCacheEvents.php)
 
 ## Event Subscriber Examples
 

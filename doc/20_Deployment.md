@@ -1,6 +1,6 @@
 # Configuration & Deployment
 
-The configuration by default is saved in `var/config/data-hub/example.yaml`.
+The configuration by default is saved in `var/config/data_hub/example.yaml`.
 Additionally, a workspace permission index is kept in the database for better query performance when 
 checking for permissions.
 
@@ -22,12 +22,6 @@ to do that for all definitions, or:
 datahub:configuration:rebuild-workspaces --configs=assets,events
 ```
 for specific definitions.
-
-:::warning
-
-Note: The command ```datahub:graphql:rebuild-definitions ``` is marked as deprecated and will be removed in a future release.
-
-:::
 
 ### Configuration Storage
 

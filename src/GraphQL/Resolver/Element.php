@@ -174,7 +174,14 @@ class Element
     {
         $arguments = [];
         if ($this->elementType === 'object') {
-            $arguments[] = $args['objectTypes'] ?? [AbstractObject::OBJECT_TYPE_OBJECT, AbstractObject::OBJECT_TYPE_FOLDER];
+            $allowed = [AbstractObject::OBJECT_TYPE_OBJECT, AbstractObject::OBJECT_TYPE_FOLDER, AbstractObject::OBJECT_TYPE_VARIANT];
+            $objectTypes = $args['objectTypes'] ?? [AbstractObject::OBJECT_TYPE_OBJECT, AbstractObject::OBJECT_TYPE_FOLDER];
+            // Значения уходят в Listing::setObjectTypes и дальше в SQL как константы — только известные типы.
+            $objectTypes = array_values(array_intersect((array) $objectTypes, $allowed));
+            if ($objectTypes === []) {
+                throw new ClientSafeException('objectTypes must contain at least one of: ' . implode(', ', $allowed));
+            }
+            $arguments[] = $objectTypes;
         }
 
         return $arguments;

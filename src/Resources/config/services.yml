@@ -30,3 +30,5 @@ services:
         public: true
         arguments:
             $bundle: "@=service('kernel').getBundle('OpenDxpDataHubBundle')"
+
+    OpenDxp\Bundle\DataHubBundle\Service\ApiKeyServiceInterface: '@OpenDxp\Bundle\DataHubBundle\Service\ApiKeyService'

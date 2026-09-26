@@ -3,16 +3,16 @@
 declare(strict_types=1);
 
 /**
- * Pimcore
+ * OpenDXP
  *
- * This source file is available under two different licenses:
- * - GNU General Public License version 3 (GPLv3)
- * - Pimcore Commercial License (PCL)
+ * This source file is licensed under the GNU General Public License version 3 (GPLv3).
+ *
  * Full copyright and license information is available in
  * LICENSE.md which is distributed with this source code.
  *
- *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
- *  @license    http://www.pimcore.org/license     GPLv3 and PCL
+ * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
+ * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
+ * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
  */
 
 namespace OpenDxp\Bundle\DataHubBundle\Migrations\PimcoreX;
@@ -29,11 +29,11 @@ final class Version20221212152145 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('UPDATE settings_store SET data=REPLACE(data, \'"childs":\', \'"children":\') WHERE scope=\'pimcore_data_hub\';');
+        $this->addSql('UPDATE settings_store SET data=REPLACE(data, \'"childs":\', \'"children":\') WHERE scope IN (\'opendxp_data_hub\',\'pimcore_data_hub\');');
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql('UPDATE settings_store SET data=REPLACE(data, \'"children":\', \'"childs":\') WHERE scope=\'pimcore_data_hub\';');
+        $this->addSql('UPDATE settings_store SET data=REPLACE(data, \'"children":\', \'"childs":\') WHERE scope IN (\'opendxp_data_hub\',\'pimcore_data_hub\');');
     }
 }

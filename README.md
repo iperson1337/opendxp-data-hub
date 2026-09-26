@@ -18,7 +18,6 @@ technologies into a simple & easy-to-configure system on top of OpenDXP.
 
 The basic configuration of Datahub comes with a GraphQL API, which is described in the next sections of this documentation. To use another configuration, OpenDXP Datahub can be extended with different adapters (see [Further Information](#further-information)).
 
-A short introduction video of an output channel based on the GraphQL query language can be found [here](./doc/img/graphql/intro.mp4).
 
 ## Features in a Nutshell
 - Easy-to-configure interface layer for data delivery and consumption

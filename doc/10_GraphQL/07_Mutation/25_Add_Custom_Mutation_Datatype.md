@@ -14,12 +14,12 @@ Add a section similar to this one to your `services.yml` file.
 ```
 
 For reference, have a look at a look at the 
-[`Geopoint datatype`](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/GraphQL/DataObjectMutationFieldConfigGenerator/Geopoint.php).
+[`Geopoint datatype`](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/GraphQL/DataObjectMutationFieldConfigGenerator/Geopoint.php).
 
 You return a valid GraphQL input type (which is an `InputObjectType`) here and a `Processor` which processes the actual
 input data.
 
 For a rather simple example have a look at the 
-[`Date`](https://github.com/open-dxp/data-hub-bundle/blob/1.x/src/GraphQL/DataObjectMutationFieldConfigGenerator/Date.php) 
+[`Date`](https://github.com/iperson1337/opendxp-data-hub/blob/main/src/GraphQL/DataObjectMutationFieldConfigGenerator/Date.php) 
 implementation (which both accepts integer and string input values).
  

@@ -6,7 +6,7 @@ To install OpenDxp Datahub follow the three steps below:
 
 1. Install the required dependencies:
 ```bash
-composer require open-dxp/data-hub-bundle
+composer require iperson1337/opendxp-data-hub
 ```
 
 2. Make sure the bundle is enabled in the `config/bundles.php` file. The following lines should be added:
