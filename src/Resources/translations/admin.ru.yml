@@ -1,0 +1,2 @@
+plugin_opendxp_datahub_security_save_apikeys: "Сохранить ключи"
+plugin_opendxp_datahub_security_save_apikeys_description: "Сохраняет только API-ключи. Работает, даже если сам конфиг недоступен для записи, и не перезаписывает файл конфигурации."

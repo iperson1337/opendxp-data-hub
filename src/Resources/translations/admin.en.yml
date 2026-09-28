@@ -90,3 +90,5 @@ plugin_opendxp_datahub_security_introspection_description: "Please note: When in
 plugin_opendxp_datahub_import: "Import"
 plugin_opendxp_datahub_export: "Export"
 plugin_opendxp_datahub_add_all_definitions: Add all definitions
+plugin_opendxp_datahub_security_save_apikeys: "Save keys"
+plugin_opendxp_datahub_security_save_apikeys_description: "Saves only the API keys. Works even when the configuration itself is not writeable and does not rewrite the configuration file."
