@@ -59,6 +59,14 @@ class LimitsTest extends TestCase
         Limits::first(-1);
     }
 
+    public function testZeroMaxFirstDisablesLimit(): void
+    {
+        Limits::configure(['max_first' => 0]);
+
+        self::assertNull(Limits::first(null));
+        self::assertSame(50000, Limits::first(50000));
+    }
+
     public function testSortKeysAcceptColumnNames(): void
     {
         self::assertSame(['name', 'o.key'], Limits::assertSortKeys(['name', 'o.key']));
