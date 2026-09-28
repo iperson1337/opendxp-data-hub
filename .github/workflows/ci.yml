@@ -52,11 +52,9 @@ jobs:
         run: vendor/bin/phpunit
 
       - name: PHPStan
-        # The OpenDXP core may not be installable on CI yet; do not fail the build.
-        continue-on-error: true
-        run: vendor/bin/phpstan analyse --memory-limit=-1
+        run: vendor/bin/phpstan analyse --memory-limit=-1 --no-progress
 
       - name: PHP CS Fixer (dry run)
-        # Inherited code is not yet formatted; report only until a formatting pass lands.
-        continue-on-error: true
         run: vendor/bin/php-cs-fixer fix --dry-run --diff
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: "1"
