@@ -51,7 +51,8 @@ class VideoTypeDataType extends UnionType
         $this->assetType = $service->buildAssetType('asset');
 
         return [
-            new ObjectType([
+            new ObjectType(
+                [
                     'name' => 'VideoDataDescriptor',
                     'fields' => [
                         'id' => ['type' => Type::string(), 'description' => 'external ID'],

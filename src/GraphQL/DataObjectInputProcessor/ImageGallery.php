@@ -54,7 +54,7 @@ class ImageGallery extends Base
                 return $container->$setter($newGallery);
             }
 
-            if (! ($newValue['replace'] ?? false)) {
+            if (!($newValue['replace'] ?? false)) {
                 foreach ($currentItems as $currentItem) {
                     if ($currentItem instanceof Hotspotimage) {
                         $hotspotImages[] = $currentItem;

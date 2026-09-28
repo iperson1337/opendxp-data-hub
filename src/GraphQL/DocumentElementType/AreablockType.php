@@ -58,7 +58,6 @@ class AreablockType extends ObjectType
                                 }
                             },
                         ],
-
                     ],
                 ];
             self::$instance = new static($config);

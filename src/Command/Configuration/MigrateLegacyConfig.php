@@ -59,7 +59,7 @@ class MigrateLegacyConfig extends AbstractCommand
         $configs = $configs['list'] ?? [];
         foreach ($configs as $key => $config) {
             $id = $config['general']['name'];
-            $this->migrateToSettingsStore((string)$id, $scope, $config);
+            $this->migrateToSettingsStore((string) $id, $scope, $config);
         }
     }
 

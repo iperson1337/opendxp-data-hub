@@ -45,7 +45,9 @@ class HardlinkType extends AbstractDocumentType
         $resolver->setGraphQLService($this->getGraphQlService());
 
         $this->buildBaseFields($config);
-        $config['fields'] = array_merge($config['fields'], [
+        $config['fields'] = array_merge(
+            $config['fields'],
+            [
                 'sourceId' => Type::int(),
                 'propertiesFromSource' => Type::boolean(),
                 'childrenFromSource' => Type::boolean(),

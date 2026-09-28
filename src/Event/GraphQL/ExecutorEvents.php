@@ -20,10 +20,10 @@ final class ExecutorEvents
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ExecutorEvent")
      */
-    const string PRE_EXECUTE = 'opendxp.datahub.graphql.executor.preExecute';
+    public const string PRE_EXECUTE = 'opendxp.datahub.graphql.executor.preExecute';
 
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ExecutorResultEvent")
      */
-    const string POST_EXECUTE = 'opendxp.datahub.graphql.executor.postExecute';
+    public const string POST_EXECUTE = 'opendxp.datahub.graphql.executor.postExecute';
 }

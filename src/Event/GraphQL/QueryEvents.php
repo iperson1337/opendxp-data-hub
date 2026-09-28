@@ -20,10 +20,10 @@ final class QueryEvents
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\QueryTypeEvent")
      */
-    const string PRE_BUILD = 'opendxp.datahub.graphql.query.preBuild';
+    public const string PRE_BUILD = 'opendxp.datahub.graphql.query.preBuild';
 
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\QueryTypeEvent")
      */
-    const string POST_BUILD = 'opendxp.datahub.graphql.query.postBuild';
+    public const string POST_BUILD = 'opendxp.datahub.graphql.query.postBuild';
 }

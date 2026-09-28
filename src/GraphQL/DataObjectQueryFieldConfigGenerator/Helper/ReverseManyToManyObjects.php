@@ -32,7 +32,7 @@ class ReverseManyToManyObjects
 
     /**
      * @param string $attribute
-     * @param Data $fieldDefinition
+     * @param Data\ReverseObjectRelation $fieldDefinition
      * @param ClassDefinition $class
      */
     public function __construct(

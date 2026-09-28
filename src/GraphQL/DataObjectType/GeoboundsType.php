@@ -39,7 +39,6 @@ class GeoboundsType extends ObjectType
                             'type' => GeopointType::getInstance(),
                             'resolve' => $resolver->resolveSouthWest(...),
                         ],
-
                     ],
                 ];
             self::$instance = new static($config);

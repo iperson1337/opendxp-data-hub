@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * OpenDXP
  *
@@ -10,21 +8,13 @@ declare(strict_types=1);
  * Full copyright and license information is available in
  * LICENSE.md which is distributed with this source code.
  *
- * @copyright  Copyright (c) Pimcore GmbH (https://pimcore.com)
  * @copyright  Modification Copyright (c) OpenDXP (https://www.opendxp.io)
  * @license    https://www.gnu.org/licenses/gpl-3.0.html  GNU General Public License version 3 (GPLv3)
  */
 
-namespace OpenDxp\Bundle\DataHubBundle\DependencyInjection;
+// Константы, которые ядро OpenDXP объявляет при загрузке приложения. Нужны PHPStan
+// и юнит-тестам, где ядро не поднимается.
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
-trait ContainerAwareTrait
-{
-    protected ?ContainerInterface $container = null;
-
-    public function setContainer(?ContainerInterface $container): void
-    {
-        $this->container = $container;
-    }
+if (!defined('OPENDXP_CONFIGURATION_DIRECTORY')) {
+    define('OPENDXP_CONFIGURATION_DIRECTORY', sys_get_temp_dir() . '/opendxp-config');
 }

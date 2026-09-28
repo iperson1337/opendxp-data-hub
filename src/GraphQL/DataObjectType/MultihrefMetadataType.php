@@ -47,7 +47,7 @@ class MultihrefMetadataType extends ObjectType
         $this->fieldDefinition = $fieldDefinition;
         $name = ($class instanceof Definition) ? $class->getKey() : $class->getName();
 
-        $config['name'] = 'object_'.$name.'_'.$fieldDefinition->getName();
+        $config['name'] = 'object_' . $name . '_' . $fieldDefinition->getName();
         $this->build($config);
         parent::__construct($config);
     }

@@ -25,5 +25,5 @@ final class AdminEvents
      *
      * @Event("OpenDxp\Event\Model\GenericEvent")
      */
-    const string CONFIGURATION_LIST = 'opendxp.datahub.admin.configuration.list';
+    public const string CONFIGURATION_LIST = 'opendxp.datahub.admin.configuration.list';
 }

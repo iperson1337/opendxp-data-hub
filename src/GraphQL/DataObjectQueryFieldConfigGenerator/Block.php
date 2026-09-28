@@ -71,7 +71,8 @@ class Block extends Base
     public function getResolver($attribute, $fieldDefinition, $class)
     {
         return function ($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null) use (
-            $fieldDefinition, $attribute
+            $fieldDefinition,
+            $attribute
         ) {
             $originalValue = $value;
             $result = [];
@@ -141,7 +142,7 @@ class Block extends Base
                         continue;
                     }
 
-                    $subDef = $fieldDefinition->getFieldDefinition($key);
+                    $subDef = $fieldDefinition instanceof Data\Block ? $fieldDefinition->getFieldDefinition($key) : null;
 
                     if (!$subDef) {
                         continue;

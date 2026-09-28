@@ -46,7 +46,6 @@ class CheckboxType extends ObjectType
                     'name' => 'csFeatureCheckbox',
                     'interfaces' => [CsFeature::getInstance()],
                     'fields' => $fields,
-
                 ];
             self::$instance = new static($config);
         }

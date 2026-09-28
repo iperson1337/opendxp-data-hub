@@ -56,7 +56,7 @@ class MutationType extends ObjectType
     use ElementIdentificationTrait;
     use ElementTagTrait;
 
-    /** @var array */
+    /** @var InputObjectType|null */
     public static $documentElementTypes = null;
 
     /**
@@ -694,7 +694,6 @@ class MutationType extends ObjectType
             }
 
             if (isset($entityConfig['update']) && $entityConfig['update']) {
-
                 // update
                 $opName = $updateOperationName;
 
@@ -1114,7 +1113,7 @@ class MutationType extends ObjectType
                     ];
                 }
 
-                $hasParentId = isset($args['parentId']) && $args['parentId'] !== null;
+                $hasParentId = isset($args['parentId']);
                 $hasPath = isset($args['path']) && trim((string) ($args['path'] ?? '')) !== '';
                 $hasParentUuid = isset($args['parentUuid']) && trim((string) ($args['parentUuid'] ?? '')) !== '';
                 if (!$hasParentId && !$hasPath && !$hasParentUuid) {
@@ -1965,6 +1964,7 @@ class MutationType extends ObjectType
             Version::enable();
         }
     }
+
     /**
      * Текст исключения для потребителя: только ClientAware-безопасные сообщения,
      * остальное — в лог, клиенту общая формулировка.

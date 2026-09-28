@@ -91,7 +91,7 @@ class Merge extends StringBase
     {
         $attributes = $nodeDef['attributes'];
         $fieldname = $this->getFieldname($attributes);
-        $typename = 'operator_'.$fieldname;
+        $typename = 'operator_' . $fieldname;
 
         $mergeType = new MergeType($this->graphQlService, $nodeDef, $class, $container, ['name' => $typename]);
 

@@ -46,7 +46,6 @@ class BooleanSelectType extends ObjectType
                     'name' => 'csFeatureBooleanSelect',
                     'interfaces' => [CsFeature::getInstance()],
                     'fields' => $fields,
-
                 ];
             self::$instance = new static($config);
         }

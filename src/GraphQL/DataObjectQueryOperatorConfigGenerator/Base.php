@@ -69,7 +69,6 @@ abstract class Base implements OperatorTypeDefinitionInterface
             'name' => $fieldname,
             'type' => $type,
             'resolve' => $resolver->resolve(...),
-
         ], $container);
     }
 
@@ -83,9 +82,11 @@ abstract class Base implements OperatorTypeDefinitionInterface
     {
         if ($container instanceof Data\Localizedfields) {
             $config['args'] = $config['args'] ?: [];
-            $config['args'] = array_merge($config['args'],
+            $config['args'] = array_merge(
+                $config['args'],
                 ['language' => ['type' => Type::string()],
-            ]);
+            ]
+            );
         }
 
         return $config;

@@ -49,7 +49,7 @@ trait ElementTagTrait
      */
     protected function setTags(string $element_type, int $id, $tags)
     {
-        $tag = new Tag;
+        $tag = new Tag();
         $tag->getDao()->setTagsForElement($element_type, $id, $tags);
 
         return true;
@@ -63,7 +63,7 @@ trait ElementTagTrait
         $tags = [];
         foreach ($input as $tag_input) {
             if (isset($tag_input['id']) && $tag_input['id']) {
-                $tag = Tag::getById((int)$tag_input['id']);
+                $tag = Tag::getById((int) $tag_input['id']);
             } elseif (isset($tag_input['path']) && $tag_input['path']) {
                 $tag = Tag::getByPath($tag_input['path']);
             } else {

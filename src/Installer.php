@@ -27,11 +27,11 @@ use Override;
 
 class Installer extends SettingsStoreAwareInstaller
 {
-    const DATAHUB_PERMISSION_CATEGORY = 'Datahub';
+    public const DATAHUB_PERMISSION_CATEGORY = 'Datahub';
 
-    const DATAHUB_ADAPTER_PERMISSION = 'plugin_datahub_adapter_graphql';
+    public const DATAHUB_ADAPTER_PERMISSION = 'plugin_datahub_adapter_graphql';
 
-    const DATAHUB_ADMIN_PERMISSION = 'plugin_datahub_admin';
+    public const DATAHUB_ADMIN_PERMISSION = 'plugin_datahub_admin';
 
     /**
      * Same DDL as Migrations\PimcoreX\Version20260126120000

@@ -52,10 +52,10 @@ class BlockType extends ObjectType
      */
     public function build(&$config)
     {
-        $typeName = 'block_'.$this->class->getName().'_'.$this->fieldDefinition->getName() . '_entry';
+        $typeName = 'block_' . $this->class->getName() . '_' . $this->fieldDefinition->getName() . '_entry';
         $type = BlockEntryType::getInstance($typeName, $this->graphQlService, $this->fieldDefinition, $this->class);
 
-        $config['name'] = 'block_'.$this->class->getName().'_'.$this->fieldDefinition->getName();
+        $config['name'] = 'block_' . $this->class->getName() . '_' . $this->fieldDefinition->getName();
         $config['fields'] = [
             'entries' => Type::listOf($type),
         ];

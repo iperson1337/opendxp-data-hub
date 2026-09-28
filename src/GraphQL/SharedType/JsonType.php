@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * OpenDXP
@@ -33,7 +35,7 @@ class JsonType extends ScalarType
 
     public function parseLiteral(mixed $valueNode, ?array $variables = null): mixed
     {
-        if (! property_exists($valueNode, 'value')) {
+        if (!property_exists($valueNode, 'value')) {
             throw new Exception('Can only parse objects with a value property. Input: ' . GraphQLUtils::printSafeJson($valueNode));
         }
 

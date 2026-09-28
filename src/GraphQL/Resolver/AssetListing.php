@@ -17,13 +17,16 @@ namespace OpenDxp\Bundle\DataHubBundle\GraphQL\Resolver;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+
+use function json_decode;
+
 use OpenDxp\Bundle\DataHubBundle\Configuration;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\ListingEvents;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ListingEvent;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\ElementDescriptor;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Exception\ClientSafeException;
-use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Helper;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\WorkspaceConditionBuilder;
@@ -32,7 +35,6 @@ use OpenDxp\Db;
 use OpenDxp\Model\Asset;
 use OpenDxp\Model\Element\ElementInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use function json_decode;
 
 class AssetListing
 {

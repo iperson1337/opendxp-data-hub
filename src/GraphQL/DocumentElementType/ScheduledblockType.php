@@ -58,7 +58,6 @@ class ScheduledblockType extends ObjectType
                                 }
                             },
                         ],
-
                     ],
                 ];
             self::$instance = new static($config);

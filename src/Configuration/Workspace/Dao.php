@@ -20,18 +20,18 @@ use OpenDxp\Model;
 
 class Dao extends Model\Dao\AbstractDao
 {
-    const TABLE_NAME_ASSET = 'plugin_datahub_workspaces_asset';
+    public const TABLE_NAME_ASSET = 'plugin_datahub_workspaces_asset';
 
-    const TABLE_NAME_DOCUMENT = 'plugin_datahub_workspaces_document';
+    public const TABLE_NAME_DOCUMENT = 'plugin_datahub_workspaces_document';
 
-    const TABLE_NAME_DATAOBJECT = 'plugin_datahub_workspaces_object';
+    public const TABLE_NAME_DATAOBJECT = 'plugin_datahub_workspaces_object';
 
     public function save()
     {
         if ($this->model instanceof Asset) {
             $tableName = self::TABLE_NAME_ASSET;
         } elseif ($this->model instanceof Document) {
-            $tableName = self::TABLE_NAME_DOCUMENT ;
+            $tableName = self::TABLE_NAME_DOCUMENT;
         } elseif ($this->model instanceof DataObject) {
             $tableName = self::TABLE_NAME_DATAOBJECT;
         } else {

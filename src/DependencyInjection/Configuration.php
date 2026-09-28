@@ -17,7 +17,6 @@ namespace OpenDxp\Bundle\DataHubBundle\DependencyInjection;
 
 use OpenDxp\Bundle\CoreBundle\DependencyInjection\ConfigurationHelper;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
-use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -73,7 +72,7 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    private function addConfigurationsNode(ArrayNodeDefinition | NodeDefinition $rootNode): void
+    private function addConfigurationsNode(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()
@@ -84,7 +83,7 @@ class Configuration implements ConfigurationInterface
             ->end();
     }
 
-    private function addSupportedTypes(ArrayNodeDefinition | NodeDefinition $rootNode): void
+    private function addSupportedTypes(ArrayNodeDefinition $rootNode): void
     {
         $rootNode
             ->children()

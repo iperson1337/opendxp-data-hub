@@ -29,13 +29,13 @@ use OpenDxp\Model\DataObject\Fieldcollection\Definition;
 
 class BlockEntryType extends ObjectType implements ContainerAwareInterface
 {
+    use ServiceTrait;
+    use ContainerAwareTrait;
+
     /**
      * @var static|null
      */
     protected static $instance;
-
-    use ServiceTrait;
-    use ContainerAwareTrait;
 
     /** @var Data */
     protected $fieldDefinition;
@@ -87,7 +87,7 @@ class BlockEntryType extends ObjectType implements ContainerAwareInterface
             $name = $this->class->getName();
         }
 
-        $config['name'] = 'block_'.$name.'_'.$this->fieldDefinition->getName() . '_entry';
+        $config['name'] = 'block_' . $name . '_' . $this->fieldDefinition->getName() . '_entry';
         $fields = [];
 
         $fieldHelper = $this->getGraphQlService()->getObjectFieldHelper();

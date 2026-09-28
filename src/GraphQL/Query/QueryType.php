@@ -221,7 +221,7 @@ class QueryType extends ObjectType
                 'resolve' => $resolver->resolveObjectGetter(...),
             ];
 
-            if (method_exists($class, 'getFieldDefinition') && $class->getFieldDefinition('uuid')) {
+            if ($class->getFieldDefinition('uuid')) {
                 $defGetByUuid = [
                     'name' => 'get' . $ucFirstClassName . 'ByUuid',
                     'args' => [
@@ -248,23 +248,21 @@ class QueryType extends ObjectType
                     $graphQlType = Type::string();
 
                     // determine a field type to map to GraphQL type
-                    if (method_exists($class, 'getFieldDefinition')) {
-                        $fieldDef = $class->getFieldDefinition($identifierField);
-                        if ($fieldDef && method_exists($fieldDef, 'getFieldtype')) {
-                            $fieldType = $fieldDef->getFieldtype();
-                            switch ($fieldType) {
-                                case 'numeric':
-                                    $graphQlType = Type::float();
-                                    break;
-                                case 'checkbox':
-                                case 'boolean':
-                                case 'booleanSelect':
-                                    $graphQlType = Type::boolean();
-                                    break;
-                                default:
-                                    $graphQlType = Type::string();
-                                    break;
-                            }
+                    $fieldDef = $class->getFieldDefinition($identifierField);
+                    if ($fieldDef) {
+                        $fieldType = $fieldDef->getFieldtype();
+                        switch ($fieldType) {
+                            case 'numeric':
+                                $graphQlType = Type::float();
+                                break;
+                            case 'checkbox':
+                            case 'boolean':
+                            case 'booleanSelect':
+                                $graphQlType = Type::boolean();
+                                break;
+                            default:
+                                $graphQlType = Type::string();
+                                break;
                         }
                     }
 
@@ -290,7 +288,6 @@ class QueryType extends ObjectType
                 [
                     'name' => $ucFirstClassName . 'Connection',
                     'fields' => [
-
                         'edges' => [
                             'type' => Type::listOf($edgeType),
                             'resolve' => $resolver->resolveEdges(...),

@@ -69,7 +69,6 @@ class VideoType extends ObjectType
                     'type' => Type::string(),
                     'resolve' => $resolver->resolveDescription(...),
                 ],
-
             ];
     }
 }

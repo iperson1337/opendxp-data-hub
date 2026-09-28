@@ -60,7 +60,8 @@ class Base implements DataObjectQueryFieldConfigGeneratorInterface, TypeDefiniti
     {
         if ($container instanceof Data\Localizedfields) {
             $graphQLConfig['args'] ??= [];
-            $graphQLConfig['args'] = array_merge($graphQLConfig['args'],
+            $graphQLConfig['args'] = array_merge(
+                $graphQLConfig['args'],
                 [
                     'language' => [
                         'type' => Type::string(),
@@ -68,7 +69,8 @@ class Base implements DataObjectQueryFieldConfigGeneratorInterface, TypeDefiniti
                     'getFallbackLanguageValue' => [
                         'type' => Type::boolean(),
                     ],
-            ]);
+            ]
+            );
         }
 
         // for non-standard getters we provide a resolve which takes care of the composed x~y~z key. not needed for standard getters.

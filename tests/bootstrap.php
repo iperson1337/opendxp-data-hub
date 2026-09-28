@@ -20,6 +20,8 @@ if (is_file($autoload)) {
     require $autoload;
 }
 
+require __DIR__ . '/Stubs/constants.php';
+
 if (!interface_exists(\GraphQL\Error\ClientAware::class)) {
     require __DIR__ . '/Stubs/ClientAware.php';
 }

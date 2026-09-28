@@ -39,7 +39,6 @@ class Date extends Base
     {
         $attribute = $this->getAttribute();
         Service::setValue($object, $attribute, function ($container, $setter) use ($newValue) {
-
             if ($newValue === '') {
                 $newValue = null;
             }

@@ -89,7 +89,6 @@ class MultihrefMetadata
     public function resolveMetadata($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null)
     {
         if ($value && $value['element']) {
-
             /** @var ElementMetadata $relation */
             $relation = $value['element']['__relation'];
             $meta = $relation->getData();

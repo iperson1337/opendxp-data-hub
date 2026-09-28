@@ -8,6 +8,21 @@
   `LIMIT 0` и пустой `edges` (`getProductListing`, `getAssetListing`, `getTranslationListing`).
   Теперь без `first` лимит не ставится, любой `first` принимается.
 
+### Инфраструктура
+- PHPStan уровня 5 проходит без ошибок и без baseline; шаг в CI стал блокирующим.
+  Попутно исправлены места, которые он подсветил: guard на `Concrete` в
+  `ObjectTreeType::resolveType`, проверка типа поля в
+  `ReverseManyToManyObjectRelation::getResolver`, явный `?ResolveInfo` в
+  `OpenDxpObjectType` (PHP 8.4), тип `MutationType::$documentElementTypes`,
+  docblock'и фабрик в `GraphQL\Service`, убраны `method_exists` на методах, которые
+  всегда есть. Два класса предупреждений (`new static` в синглтонах типов и
+  неиспользуемые параметры конструкторов типов) отключены по идентификатору с
+  обоснованием в `phpstan.neon.dist`.
+- Единый прогон php-cs-fixer по `src` и `tests` (104 файла, только форматирование);
+  проверка стиля в CI стала блокирующей.
+- `tests/Stubs/constants.php` объявляет `OPENDXP_CONFIGURATION_DIRECTORY` для
+  анализа и тестов без поднятого ядра.
+
 ## [1.1.0] - 2026-09-25
 
 ### Безопасность

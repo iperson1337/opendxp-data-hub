@@ -50,7 +50,7 @@ class DateType extends ObjectType
                                 $format = $args['format'];
                                 $formattedValue = $dateValue->format($format);
                             } else {
-                                $formattedValue = (string)$dateValue;
+                                $formattedValue = (string) $dateValue;
                             }
 
                             return $formattedValue;
@@ -64,7 +64,6 @@ class DateType extends ObjectType
                     'name' => 'csFeatureDate',
                     'interfaces' => [CsFeature::getInstance()],
                     'fields' => $fields,
-
                 ];
             self::$instance = new static($config);
         }

@@ -84,6 +84,7 @@ abstract class AbstractRelationsType extends UnionType
      */
     public function getTypes(): array
     {
+        /** @var Data\ManyToManyRelation|Data\ManyToManyObjectRelation|Data\ManyToOneRelation $fd */
         $fd = $this->getFieldDefinition();
 
         $types = [];

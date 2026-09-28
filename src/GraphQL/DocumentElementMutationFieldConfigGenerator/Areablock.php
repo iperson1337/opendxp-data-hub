@@ -77,7 +77,6 @@ class Areablock extends Base
                         ],
                     ],
                 ]
-
             ),
             'processor' => $this->processor->process(...),
         ];

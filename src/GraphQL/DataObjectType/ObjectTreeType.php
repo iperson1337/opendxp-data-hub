@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -66,6 +67,10 @@ class ObjectTreeType extends UnionType
 
         if ($object instanceof DataObject\Folder) {
             return $this->getGraphQlService()->getDataObjectTypeDefinition('_object_folder');
+        }
+
+        if (!$object instanceof DataObject\Concrete) {
+            return null;
         }
 
         return ClassTypeDefinitions::get($object->getClass());

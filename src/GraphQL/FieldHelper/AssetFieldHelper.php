@@ -118,7 +118,7 @@ class AssetFieldHelper extends AbstractFieldHelper
             return;
         }
 
-        $getter = 'get'.ucfirst((string) $astName);
+        $getter = 'get' . ucfirst((string) $astName);
         $arguments = $this->getArguments($ast);
         $languageArgument = $arguments['language'] ?? null;
         $thumbnailArgument = $arguments['thumbnail'] ?? null;

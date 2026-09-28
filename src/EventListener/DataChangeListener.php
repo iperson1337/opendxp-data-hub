@@ -159,6 +159,7 @@ class DataChangeListener implements EventSubscriberInterface
             }
         }
     }
+
     /**
      * Output cache GraphQL живёт по тегу `datahub`; без инвалидации свежесть данных
      * определял только TTL, а изменённый элемент отдавался устаревшим.
