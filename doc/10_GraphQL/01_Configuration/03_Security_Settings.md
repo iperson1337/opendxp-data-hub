@@ -113,7 +113,8 @@ opendxp_data_hub:
         query_depth_limit: 15
         # Maximum query complexity as computed by webonyx/graphql-php (0 disables the check)
         query_complexity_limit: 1000
-        # Maximum value of the `first` argument in listings; listings without `first` use this value
+        # Maximum value of the `first` argument in listings; listings without `first` use this value.
+        # 0 disables the limit: any `first` is accepted and listings without `first` return all rows
         max_first: 1000
         # Origins that may call the endpoint with credentials. Empty list: every origin gets
         # `Access-Control-Allow-Origin: *` but never `Access-Control-Allow-Credentials`.

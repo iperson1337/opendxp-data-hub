@@ -2,6 +2,12 @@
 
 ## [1.1.1] - 2026-09-28
 
+### Исправлено
+- `graphql.max_first: 0` отключает лимит, как и `0` у `query_depth_limit` /
+  `query_complexity_limit`. В 1.1.0 листинг без аргумента `first` получал `setLimit(0)`, то есть
+  `LIMIT 0` и пустой `edges` (`getProductListing`, `getAssetListing`, `getTranslationListing`).
+  Теперь без `first` лимит не ставится, любой `first` принимается.
+
 ### Инфраструктура
 - PHPStan уровня 5 проходит без ошибок и без baseline; шаг в CI стал блокирующим.
   Попутно исправлены места, которые он подсветил: guard на `Concrete` в
