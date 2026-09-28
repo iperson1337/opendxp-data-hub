@@ -74,6 +74,10 @@ class ReverseManyToManyObjectRelation extends Base
     #[Override]
     public function getResolver($attribute, $fieldDefinition, $class)
     {
+        if (!$fieldDefinition instanceof Data\ReverseObjectRelation) {
+            throw new \InvalidArgumentException(sprintf('Expected %s, got %s', Data\ReverseObjectRelation::class, get_debug_type($fieldDefinition)));
+        }
+
         $resolver = new \OpenDxp\Bundle\DataHubBundle\GraphQL\DataObjectQueryFieldConfigGenerator\Helper\ReverseManyToManyObjects($this->getGraphQlService(), $attribute, $fieldDefinition, $class);
 
         return $resolver->resolve(...);

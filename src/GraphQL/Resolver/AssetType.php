@@ -47,11 +47,9 @@ class AssetType
             return null;
         }
 
-        if ($asset) {
-            $result = $this->getTags('asset', $asset->getId());
-            if ($result) {
-                return $result;
-            }
+        $result = $this->getTags('asset', $asset->getId());
+        if ($result) {
+            return $result;
         }
 
         return null;
@@ -72,7 +70,7 @@ class AssetType
         if (!$asset) {
             return null;
         }
-        $metadata = $asset?->getMetadata(raw: true);
+        $metadata = $asset->getMetadata(raw: true);
         if (!$metadata) {
             return null;
         }

@@ -120,7 +120,7 @@ final class ManyToOneRelationUuid extends Base
         }
 
         $classes = $fieldDefinition->getClasses();
-        if (empty($classes) || !is_array($classes)) {
+        if (empty($classes)) {
             return null;
         }
 

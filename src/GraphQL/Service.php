@@ -242,7 +242,7 @@ class Service
     public function buildDataObjectMutationDataConfig($nodeDef, $class = null, $container = null)
     {
         $typeName = $nodeDef['attributes']['dataType'];
-        /** @var DataObjectMutationFieldConfigGeneratorInterface $factory */
+        /** @var DataObjectMutationFieldConfigGenerator\Base $factory */
         $factory = $this->dataObjectMutationTypeGeneratorFactories->get('typegenerator_dataobjectmutationdatatype_' . $typeName);
         $result = $factory->getGraphQlMutationFieldConfig($nodeDef, $class, $container);
 
@@ -349,7 +349,7 @@ class Service
     public function buildDataObjectQueryOperatorConfig($typeName, $nodeDef, ?ClassDefinition $class = null, $container = null, $params = [])
     {
         $typeName = strtolower($typeName);
-        /** @var DataObjectQueryFieldConfigGeneratorInterface $factory */
+        /** @var DataObjectQueryOperatorConfigGenerator\Base $factory */
         $factory = $this->dataObjectQueryTypeGeneratorFactories->get('typegenerator_queryoperator_' . $typeName);
         $result = $factory->getGraphQlQueryOperatorConfig($typeName, $nodeDef, $class, $container, $params);
 
@@ -391,7 +391,8 @@ class Service
     public function buildDataObjectOperatorQueryType($mode, $typeName, $nodeDef, ?ClassDefinition $class = null, $container = null, $params = [])
     {
         $typeName = strtolower($typeName);
-        /** @var DataObjectQueryFieldConfigGeneratorInterface $factory */
+        // Ни один зарегистрированный генератор не реализует getGraphQlOperatorConfig(); ветка унаследована от upstream.
+        /** @var mixed $factory */
         $factory = $this->dataObjectQueryTypeGeneratorFactories->get('typegenerator_operator_' . $typeName);
         $result = $factory->getGraphQlOperatorConfig($mode, $typeName, $nodeDef, $class, $container, $params);
 

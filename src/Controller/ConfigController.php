@@ -540,7 +540,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
             'method' => (string) ($security['method'] ?? ''),
             'skipPermissionCheck' => (bool) ($security['skipPermissionCheck'] ?? false),
             'disableIntrospection' => (bool) ($security['disableIntrospection'] ?? false),
-            'apikey' => array_values($keys),
+            'apikey' => $keys,
         ];
     }
 

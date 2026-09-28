@@ -56,7 +56,7 @@ class MutationType extends ObjectType
     use ElementIdentificationTrait;
     use ElementTagTrait;
 
-    /** @var array */
+    /** @var InputObjectType|null */
     public static $documentElementTypes = null;
 
     /**
@@ -1114,7 +1114,7 @@ class MutationType extends ObjectType
                     ];
                 }
 
-                $hasParentId = isset($args['parentId']) && $args['parentId'] !== null;
+                $hasParentId = isset($args['parentId']);
                 $hasPath = isset($args['path']) && trim((string) ($args['path'] ?? '')) !== '';
                 $hasParentUuid = isset($args['parentUuid']) && trim((string) ($args['parentUuid'] ?? '')) !== '';
                 if (!$hasParentId && !$hasPath && !$hasParentUuid) {

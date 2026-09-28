@@ -141,7 +141,7 @@ class Block extends Base
                         continue;
                     }
 
-                    $subDef = $fieldDefinition->getFieldDefinition($key);
+                    $subDef = $fieldDefinition instanceof Data\Block ? $fieldDefinition->getFieldDefinition($key) : null;
 
                     if (!$subDef) {
                         continue;

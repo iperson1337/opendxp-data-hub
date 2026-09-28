@@ -139,7 +139,7 @@ class ApiKeyService implements ApiKeyServiceInterface
      * Constant-time check whether the candidate equals any of the given keys.
      * Every key is compared (no early return) so that timing does not reveal the position of a match.
      *
-     * @param string[] $keys
+     * @param array<mixed> $keys non-string entries are ignored
      */
     public static function matchesAny(string $candidate, array $keys): bool
     {

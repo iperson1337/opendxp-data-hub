@@ -45,7 +45,9 @@ abstract class DefaultMutationOperatorFactoryBase
     {
         /** @var OperatorInterface $operatorImpl */
         $operatorImpl = new $this->className($this->getGraphQlService());
-        $operatorImpl->setGraphQlService($this->getGraphQlService());
+        if (method_exists($operatorImpl, 'setGraphQlService')) {
+            $operatorImpl->setGraphQlService($this->getGraphQlService());
+        }
 
         return $operatorImpl;
     }

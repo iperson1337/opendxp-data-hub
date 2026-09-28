@@ -1,9 +1,8 @@
 # PHPStan configuration for OpenDXP DataHub.
 #
-# NOTE: static analysis requires the OpenDXP core (open-dxp/opendxp) and the
-# admin bundle (open-dxp/admin-bundle) to be installed, since most classes in
-# src/ extend or type-hint against core classes. Run `composer install` first;
-# autoloading is bootstrapped via vendor/autoload.php.
+# Static analysis requires the OpenDXP core (open-dxp/opendxp) and the admin
+# bundle to be installed: most classes in src/ extend or type-hint core classes.
+# Run `composer install` first; autoloading comes from vendor/autoload.php.
 parameters:
     level: 5
     paths:
@@ -11,5 +10,12 @@ parameters:
         - tests
     bootstrapFiles:
         - vendor/autoload.php
+        - tests/Stubs/constants.php
     treatPhpDocTypesAsCertain: false
-    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # GraphQL type singletons (`getInstance()` → `new static($config)`) come from
+        # upstream; constructors take a config array and are not meant to be overridden.
+        - identifier: new.static
+        # Type constructors keep an unused `$context`/`$config` parameter for signature
+        # compatibility with the type factory; changing them is an API break.
+        - identifier: constructor.unusedParameter

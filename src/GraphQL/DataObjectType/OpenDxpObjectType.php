@@ -394,7 +394,7 @@ class OpenDxpObjectType extends ObjectType
                 'name' => 'object_' . $this->className . '_' . $fieldname,
                 'fields' => $brickFields,
             ]),
-            'resolve' => function ($value = null, $args = [], $context = [], ResolveInfo $resolveInfo = null) use ($fieldname, $fieldHelper) {
+            'resolve' => function ($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null) use ($fieldname, $fieldHelper) {
                 if (!isset($value[$fieldname]) || !($value[$fieldname] instanceof Objectbrick)) {
                     return null;
                 }
