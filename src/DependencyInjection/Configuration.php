@@ -50,7 +50,7 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->integerNode('query_depth_limit')->info('Maximum GraphQL query depth, 0 disables')->defaultValue(15)->end()
                         ->integerNode('query_complexity_limit')->info('Maximum GraphQL query complexity, 0 disables')->defaultValue(1000)->end()
-                        ->integerNode('max_first')->info('Maximum value of the first argument in listings')->defaultValue(1000)->end()
+                        ->integerNode('max_first')->info('Maximum value of the first argument in listings; listings without first use it, 0 disables the limit')->defaultValue(1000)->end()
                         ->arrayNode('cors_origins')
                             ->info('Allowed CORS origins; empty means Access-Control-Allow-Origin: * without credentials')
                             ->defaultValue([])

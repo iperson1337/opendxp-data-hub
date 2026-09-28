@@ -60,12 +60,15 @@ final class Limits
     /**
      * Приводит аргумент `first` к допустимому лимиту: без аргумента — максимум,
      * больше максимума — ошибка потребителю, а не тихое усечение.
+     *
+     * `max_first: 0` отключает лимит: без аргумента возвращается `null` (листинг без LIMIT),
+     * а не 0 — `setLimit(0)` превращается в `LIMIT 0` и пустой ответ.
      */
-    public static function first(mixed $first): int
+    public static function first(mixed $first): ?int
     {
         $max = self::maxFirst();
         if ($first === null) {
-            return $max;
+            return $max > 0 ? $max : null;
         }
 
         $first = (int) $first;
