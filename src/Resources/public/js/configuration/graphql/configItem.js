@@ -259,6 +259,17 @@ opendxp.plugin.datahub.configuration.graphql.configItem = Class.create(opendxp.e
                                 let newKey = md5(uniqid());
                                 apikeyField.setValue(val ? val + "\n" + newKey : newKey);
                             }.bind(this)
+                        },
+                        {
+                            xtype: "button",
+                            style: "margin-left: 8px",
+                            text: t("plugin_opendxp_datahub_security_save_apikeys"),
+                            tooltip: t("plugin_opendxp_datahub_security_save_apikeys_description"),
+                            iconCls: "opendxp_icon_save",
+                            disabled: !this.userPermissions.update,
+                            handler: function () {
+                                this.saveApiKeys(apikeyField);
+                            }.bind(this)
                         }
                     ]
                 },
@@ -882,6 +893,42 @@ opendxp.plugin.datahub.configuration.graphql.configItem = Class.create(opendxp.e
                     opendxp.helpers.showNotification(t("error"), t("plugin_opendxp_datahub_configpanel_item_saveerror"), "error", t(rdata.message));
                 }
             }.bind(this)
+        });
+    },
+
+    saveApiKeys: function (apikeyField) {
+        if (!apikeyField.isValid()) {
+            return;
+        }
+
+        Ext.Ajax.request({
+            url: "/admin/opendxpdatahub/config/save-api-keys",
+            params: {
+                name: this.data.general.name,
+                apikey: apikeyField.getValue()
+            },
+            method: "post",
+            success: function (response) {
+                const rdata = Ext.decode(response.responseText);
+                if (rdata && rdata.success) {
+                    this.data.security = this.data.security || {};
+                    this.data.security.apikey = rdata.apikey;
+                    apikeyField.setValue(rdata.apikey.join("\n"));
+                    opendxp.helpers.showNotification(t("success"), t("plugin_opendxp_datahub_configpanel_item_save_success"), "success");
+                }
+            }.bind(this),
+            failure: function (response) {
+                let rdata = null;
+                try {
+                    rdata = Ext.decode(response.responseText);
+                } catch (e) {
+                }
+                if (rdata && rdata.permissionError) {
+                    opendxp.helpers.showNotification(t("error"), t("plugin_opendxp_datahub_configpanel_item_saveerror_permissions"), "error");
+                } else {
+                    opendxp.helpers.showNotification(t("error"), t("plugin_opendxp_datahub_configpanel_item_saveerror"), "error", rdata && rdata.message ? t(rdata.message) : "");
+                }
+            }
         });
     },
 

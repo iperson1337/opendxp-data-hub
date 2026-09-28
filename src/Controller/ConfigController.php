@@ -16,6 +16,7 @@
 namespace OpenDxp\Bundle\DataHubBundle\Controller;
 
 use Exception;
+use InvalidArgumentException;
 use OpenDxp;
 use OpenDxp\Bundle\DataHubBundle\ConfigEvents;
 use OpenDxp\Bundle\DataHubBundle\Configuration;
@@ -489,6 +490,51 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         } catch (Exception $e) {
             return $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Saves only the API keys of a configuration. The keys live in the database, so unlike /save
+     * this does not depend on the configuration being writeable (e.g. symfony-config with debug off)
+     * and never rewrites the configuration file.
+     */
+    #[Route('/save-api-keys', methods: ['POST'])]
+    public function saveApiKeysAction(Request $request): JsonResponse
+    {
+        $this->checkPermission(self::CONFIG_NAME);
+
+        $name = $request->request->getString('name');
+        $config = Configuration::getByName($name);
+        if (!$config) {
+            return $this->json(
+                ['success' => false, 'message' => sprintf('Configuration "%s" does not exist', $name)],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        if (!$config->isAllowed('update')) {
+            return $this->json(['success' => false, 'permissionError' => true], Response::HTTP_FORBIDDEN);
+        }
+
+        if (!$this->isDatahubAdmin()) {
+            return $this->json(
+                ['success' => false, 'message' => 'Only Datahub administrators may change security settings, workspaces or SQL conditions'],
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
+        $apiKeys = $this->parseApiKeys($request->request->getString('apikey'));
+
+        try {
+            if ($apiKeys) {
+                $this->apiKeyService->saveApiKeys($name, $apiKeys);
+            } else {
+                $this->apiKeyService->deleteApiKeys($name);
+            }
+        } catch (InvalidArgumentException $e) {
+            return $this->json(['success' => false, 'message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+
+        return $this->json(['success' => true, 'apikey' => $this->apiKeyService->getApiKeys($name)]);
     }
 
     private function isDatahubAdmin(): bool
