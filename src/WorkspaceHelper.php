@@ -32,15 +32,15 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class WorkspaceHelper
 {
-    const MODIFY_SPACE_OBJECT = 'object';
+    public const MODIFY_SPACE_OBJECT = 'object';
 
-    const MODIFY_SPACE_ASSET = 'asset';
+    public const MODIFY_SPACE_ASSET = 'asset';
 
-    const MODIFY_SPACE_DOCUMENT = 'document';
+    public const MODIFY_SPACE_DOCUMENT = 'document';
 
-    const MODIFY_TYPE_REPLACE = 'replace';
+    public const MODIFY_TYPE_REPLACE = 'replace';
 
-    const MODIFY_TYPE_DELETE = 'delete';
+    public const MODIFY_TYPE_DELETE = 'delete';
 
     /**
      * @return array
@@ -106,7 +106,6 @@ class WorkspaceHelper
             $cTrailingReplaceValue = sprintf('%s/', $replaceValue);
 
             if ($cPath === $searchValue) {
-
                 // it's the element itself
                 $changed = true;
 
@@ -116,7 +115,6 @@ class WorkspaceHelper
                     $toDelete[] = $spaceIndex;
                 }
             } elseif (str_starts_with($cTrailingPath, $cTrailingSearchValue)) {
-
                 // it's a sub element (prefix match only: `/a/b/x` must not react to a rename of `/b`)
                 $changed = true;
 
@@ -243,7 +241,7 @@ class WorkspaceHelper
         $eventDispatcher = OpenDxp::getContainer()->get('event_dispatcher');
         $eventDispatcher->dispatch($event, PermissionEvents::PRE_CHECK);
         if (!$event->isGranted() && OpenDxpDataHubBundle::getNotAllowedPolicy() === OpenDxpDataHubBundle::NOT_ALLOWED_POLICY_EXCEPTION) {
-            throw new ClientSafeException('access for '.  $element->getFullPath() . ' denied');
+            throw new ClientSafeException('access for ' . $element->getFullPath() . ' denied');
         }
 
         $isAllowed = self::isAllowed($element, $configuration, $type);
@@ -375,6 +373,6 @@ class WorkspaceHelper
 
     private static function getCacheTags(Configuration $configuration): array
     {
-        return ['datahub_workspace_permissions_'. $configuration->getName()];
+        return ['datahub_workspace_permissions_' . $configuration->getName()];
     }
 }

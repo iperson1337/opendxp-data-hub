@@ -79,7 +79,6 @@ class DocumentType extends ObjectType
 
                         return null;
                     },
-
                 ]]];
 
         parent::__construct($config);

@@ -24,7 +24,7 @@ final class OutputCacheEvents
      *
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\CachePreLoadEvent")
      */
-    const string PRE_LOAD = 'opendxp.datahub.graphql.cache.preLoad';
+    public const string PRE_LOAD = 'opendxp.datahub.graphql.cache.preLoad';
 
     /**
      * Fired before the response is written to cache. Can be used to set or purge
@@ -32,5 +32,5 @@ final class OutputCacheEvents
      *
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\CachePreSaveEvent")
      */
-    const string PRE_SAVE = 'opendxp.datahub.graphql.cache.preSave';
+    public const string PRE_SAVE = 'opendxp.datahub.graphql.cache.preSave';
 }

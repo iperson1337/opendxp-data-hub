@@ -41,7 +41,9 @@ class EmailType extends AbstractDocumentType
         $resolver->setGraphQLService($this->getGraphQlService());
 
         $this->buildBaseFields($config);
-        $config['fields'] = array_merge($config['fields'], [
+        $config['fields'] = array_merge(
+            $config['fields'],
+            [
                 'subject' => Type::string(),
                 'from' => Type::string(),
                 'replyTo' => Type::string(),

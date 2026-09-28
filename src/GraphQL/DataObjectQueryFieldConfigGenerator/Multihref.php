@@ -40,7 +40,10 @@ class Multihref extends Base implements TypeDefinitionInterface
     #[Override]
     public function getGraphQlFieldConfig($attribute, Data $fieldDefinition, $class = null, $container = null)
     {
-        return $this->enrichConfig($fieldDefinition, $class, $attribute,
+        return $this->enrichConfig(
+            $fieldDefinition,
+            $class,
+            $attribute,
             [
                 'name' => $fieldDefinition->getName(),
                 'type' => $this->getFieldType($fieldDefinition, $class, $container),

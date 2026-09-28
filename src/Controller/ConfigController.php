@@ -691,7 +691,7 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         );
         $response = new Response($json);
         $response->headers->set('Content-type', 'application/json');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
         return $response;
     }

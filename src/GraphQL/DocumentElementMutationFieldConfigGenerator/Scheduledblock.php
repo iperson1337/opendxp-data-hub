@@ -76,7 +76,6 @@ class Scheduledblock extends Base
                         ],
                     ],
                 ]
-
             ),
             'processor' => $this->processor->process(...),
         ];

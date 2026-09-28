@@ -115,7 +115,7 @@ abstract class AbstractFieldHelper
             $data['id'] = $container->getId();
         }
 
-        $resolveInfoArray = (array)$resolveInfo;
+        $resolveInfoArray = (array) $resolveInfo;
         $fieldAstList = (array) $resolveInfoArray['fieldNodes'];
 
         foreach ($fieldAstList as $astNode) {

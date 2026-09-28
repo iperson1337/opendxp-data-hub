@@ -27,7 +27,7 @@ class HelperFilterTest extends TestCase
     protected function setUp(): void
     {
         // Квотирование как у PDO MySQL, без реального соединения.
-        Helper::useConnection(new class {
+        Helper::useConnection(new class () {
             public function quote(mixed $value): string
             {
                 return "'" . addcslashes((string) $value, "\\'\0\n\r\"\x1a") . "'";

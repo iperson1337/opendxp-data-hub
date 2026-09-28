@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -30,7 +31,7 @@ use Override;
  */
 class ImageGallery extends Base
 {
-    const TYPE = 'imageGallery';
+    public const TYPE = 'imageGallery';
 
     /**
      * @param string $attribute

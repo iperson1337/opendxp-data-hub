@@ -50,7 +50,8 @@ class ManyToManyRelation extends Base
                         $result[] = $element;
                     } else {
                         throw new NotFoundException(
-                            sprintf('Element with id %s or fullpath %s not found',
+                            sprintf(
+                                'Element with id %s or fullpath %s not found',
                                 $newValueItemValue['id'],
                                 $newValueItemValue['fullpath']
                             )

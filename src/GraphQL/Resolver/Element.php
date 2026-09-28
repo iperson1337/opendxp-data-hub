@@ -35,7 +35,8 @@ use OpenDxp\Model\Property;
 
 class Element
 {
-    use ServiceTrait, ElementTagTrait;
+    use ServiceTrait;
+    use ElementTagTrait;
 
     /** @var string */
     protected $elementType;

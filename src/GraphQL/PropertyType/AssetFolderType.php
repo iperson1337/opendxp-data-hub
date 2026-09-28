@@ -78,7 +78,6 @@ class AssetFolderType extends ObjectType
 
                         return null;
                     },
-
                 ]]];
 
         parent::__construct($config);

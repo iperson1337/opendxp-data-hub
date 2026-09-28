@@ -46,7 +46,6 @@ class StringType extends ObjectType
                     'name' => $name,
                     'interfaces' => [CsFeature::getInstance()],
                     'fields' => $fields,
-
                 ];
             self::$instance[$name] = new static($config);
         }

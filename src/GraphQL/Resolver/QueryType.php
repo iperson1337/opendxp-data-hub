@@ -602,6 +602,7 @@ class QueryType
      * @param ResolveInfo|null $resolveInfo
      *
      * @return ElementDescriptor
+     *
      * @throws ClientSafeException
      */
     private function extractObjectData($object, $args, $context, $resolveInfo)

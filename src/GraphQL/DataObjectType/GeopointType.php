@@ -40,7 +40,6 @@ class GeopointType extends ObjectType
                             'type' => Type::float(),
                             'resolve' => $resolver->resolveLatitude(...),
                         ],
-
                     ],
                 ];
             self::$instance = new static($config);

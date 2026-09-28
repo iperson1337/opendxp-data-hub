@@ -288,7 +288,6 @@ class QueryType extends ObjectType
                 [
                     'name' => $ucFirstClassName . 'Connection',
                     'fields' => [
-
                         'edges' => [
                             'type' => Type::listOf($edgeType),
                             'resolve' => $resolver->resolveEdges(...),

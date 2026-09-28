@@ -79,7 +79,6 @@ class ObjectMetadataType extends ObjectType
             'metadata' => [
                 'type' => Type::listOf($metadataKeyValuePairType),
                 'resolve' => $resolver->resolveMetadata(...),
-
             ]];
 
         $config['fields'] = $fields;

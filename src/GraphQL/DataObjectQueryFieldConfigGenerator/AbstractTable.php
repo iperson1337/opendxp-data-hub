@@ -60,7 +60,7 @@ abstract class AbstractTable extends Base
                 foreach ($rows as &$row) {
                     $row = array_combine(
                         array_map(
-                            fn ($k) => is_numeric($k) ? 'col'. $k : $k,
+                            fn ($k) => is_numeric($k) ? 'col' . $k : $k,
                             array_keys($row)
                         ),
                         $row

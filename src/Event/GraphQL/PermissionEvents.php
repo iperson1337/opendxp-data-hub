@@ -20,5 +20,5 @@ final class PermissionEvents
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\PermissionEvent")
      */
-    const string PRE_CHECK = 'opendxp.datahub.graphql.permission.preCheck';
+    public const string PRE_CHECK = 'opendxp.datahub.graphql.permission.preCheck';
 }

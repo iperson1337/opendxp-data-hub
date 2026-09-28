@@ -25,7 +25,8 @@ use Override;
 
 class DataObject extends Element
 {
-    use ServiceTrait, ElementTagTrait;
+    use ServiceTrait;
+    use ElementTagTrait;
 
     public function __construct(Service $graphQlService)
     {

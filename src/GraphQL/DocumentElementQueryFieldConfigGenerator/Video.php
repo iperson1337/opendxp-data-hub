@@ -26,7 +26,6 @@ class Video extends Base
      */
     public function __construct(Service $graphQlService)
     {
-
         //        $this->assetType = $assetType;
         parent::__construct($graphQlService);
     }

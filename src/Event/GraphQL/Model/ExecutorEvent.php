@@ -45,7 +45,7 @@ class ExecutorEvent extends Event
      */
     public function setRequest($request, $asString = true)
     {
-        $this->request = $asString ? (string)$request : $request;
+        $this->request = $asString ? (string) $request : $request;
     }
 
     /**

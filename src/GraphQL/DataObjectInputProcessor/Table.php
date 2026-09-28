@@ -68,7 +68,7 @@ class Table extends Base
                 return $container->$setter($currentTable);
             }
 
-            if (! ($newValue['replace'] ?? false)) {
+            if (!($newValue['replace'] ?? false)) {
                 if (count($currentTable) > 0) {
                     foreach ($currentTable as $row) {
                         $newTable[] = $row;

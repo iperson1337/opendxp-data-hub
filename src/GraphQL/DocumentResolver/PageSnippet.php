@@ -64,9 +64,11 @@ class PageSnippet
                 }
             }
 
-            usort($result,
+            usort(
+                $result,
                 // "Natural order" comparison so that "10" is ordered after "2"
-                fn (Editable $a, Editable $b) => strnatcmp($sortBy[$a->getName()], $sortBy[$b->getName()]));
+                fn (Editable $a, Editable $b) => strnatcmp($sortBy[$a->getName()], $sortBy[$b->getName()])
+            );
 
             return $result;
         }

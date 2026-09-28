@@ -29,7 +29,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class AssetType
 {
-    use ServiceTrait, ElementTagTrait;
+    use ServiceTrait;
+    use ElementTagTrait;
 
     /**
      * @param ElementDescriptor|null $value
@@ -277,9 +278,9 @@ class AssetType
 
             /** @var Asset\Image $asset */
             $asset = $this->getAssetFromValue($value, $context);
-        if (!$asset) {
-            return null;
-        }
+            if (!$asset) {
+                return null;
+            }
             $thumbnail = $assetFieldHelper->getAssetThumbnail($asset, $thumbnailName, $thumbnailFormat);
             if (isset($thumbnail)) {
                 $thumbnailConfig = $thumbnail->getConfig();
@@ -314,9 +315,9 @@ class AssetType
         if ($value instanceof ElementDescriptor) {
             $thumbnailName = $args['thumbnail'] ?? null;
             $asset = $this->getAssetFromValue($value, $context);
-        if (!$asset) {
-            return null;
-        }
+            if (!$asset) {
+                return null;
+            }
 
             // Дальше имя уходит в Asset::getThumbnail()/getImageThumbnail() напрямую,
             // мимо getAssetThumbnail() — сверяем регистр здесь.

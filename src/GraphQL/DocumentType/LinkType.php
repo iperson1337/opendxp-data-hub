@@ -44,7 +44,9 @@ class LinkType extends AbstractDocumentType
         $anyTargetType = $graphQlService->buildGeneralType('anytarget');
 
         $this->buildBaseFields($config);
-        $config['fields'] = array_merge($config['fields'], [
+        $config['fields'] = array_merge(
+            $config['fields'],
+            [
             'internal' => Type::int(),
             'internalType' => Type::string(),
             'object' => [

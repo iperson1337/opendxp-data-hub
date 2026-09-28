@@ -60,7 +60,7 @@ class Fieldcollections extends Base
         $autoIdx = 0;
         $newItems = [];
 
-        if (! ($newValue['replace'] ?? false)) {
+        if (!($newValue['replace'] ?? false)) {
             foreach ($currentItems as $currentItem) {
                 $newItems[$currentItem->getIndex()] = $currentItem;
             }

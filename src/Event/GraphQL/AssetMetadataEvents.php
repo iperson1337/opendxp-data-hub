@@ -20,5 +20,5 @@ final class AssetMetadataEvents
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\AssetEvent")
      */
-    const string PRE_RESOLVE = 'opendxp.datahub.graphql.asset.metadata.preResolve';
+    public const string PRE_RESOLVE = 'opendxp.datahub.graphql.asset.metadata.preResolve';
 }

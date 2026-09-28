@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -43,7 +44,10 @@ class Hotspotimage extends Base
     #[Override]
     public function getGraphQlFieldConfig($attribute, Data $fieldDefinition, $class = null, $container = null)
     {
-        return $this->enrichConfig($fieldDefinition, $class, $attribute,
+        return $this->enrichConfig(
+            $fieldDefinition,
+            $class,
+            $attribute,
             [
                 'name' => $fieldDefinition->getName(),
                 'type' => $this->getFieldType($fieldDefinition, $class, $container),
@@ -79,7 +83,6 @@ class Hotspotimage extends Base
     #[Override]
     public function getResolver($attribute, $fieldDefinition, $class)
     {
-
         /** @var Data\Hotspotimage $fieldDefinition */
         $resolver = new Helper\Hotspotimage($this->getGraphQlService(), $attribute, $fieldDefinition, $class);
 

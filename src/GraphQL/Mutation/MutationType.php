@@ -694,7 +694,6 @@ class MutationType extends ObjectType
             }
 
             if (isset($entityConfig['update']) && $entityConfig['update']) {
-
                 // update
                 $opName = $updateOperationName;
 
@@ -1965,6 +1964,7 @@ class MutationType extends ObjectType
             Version::enable();
         }
     }
+
     /**
      * Текст исключения для потребителя: только ClientAware-безопасные сообщения,
      * остальное — в лог, клиенту общая формулировка.

@@ -172,7 +172,6 @@ class OpenDxpObjectType extends ObjectType
         ];
 
         if ($context['clientname']) {
-
             /** @var Configuration $configurationItem */
             $configurationItem = $context['configuration'];
 
@@ -328,17 +327,10 @@ class OpenDxpObjectType extends ObjectType
 
                     return null;
                 },
-
             ];
     }
 
     /**
-     * @param array $column
-     * @param ClassDefinition $class
-     * @param array $fields
-     *
-     * @return void
-     *
      * @throws \Exception
      */
     public function addObjectBrickDefs(array $column, ClassDefinition $class, array &$fields): void
@@ -422,10 +414,7 @@ class OpenDxpObjectType extends ObjectType
     /**
      * Build fields for a brick type (regular and localized fields)
      *
-     * @param ObjectbrickDefinition $brickDef
      * @param DataObjectFieldHelper $fieldHelper
-     *
-     * @return array
      */
     private function buildBrickTypeFields(ObjectbrickDefinition $brickDef, $fieldHelper): array
     {

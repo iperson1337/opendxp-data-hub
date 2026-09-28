@@ -20,10 +20,10 @@ final class MutationEvents
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\MutationTypeEvent")
      */
-    const string PRE_BUILD = 'opendxp.datahub.graphql.mutation.preBuild';
+    public const string PRE_BUILD = 'opendxp.datahub.graphql.mutation.preBuild';
 
     /**
      * @Event("OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\MutationTypeEvent")
      */
-    const string POST_BUILD = 'opendxp.datahub.graphql.mutation.postBuild';
+    public const string POST_BUILD = 'opendxp.datahub.graphql.mutation.postBuild';
 }

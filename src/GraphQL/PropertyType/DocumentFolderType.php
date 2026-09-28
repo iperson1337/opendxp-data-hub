@@ -79,7 +79,6 @@ class DocumentFolderType extends ObjectType
 
                         return null;
                     },
-
                 ]]];
 
         parent::__construct($config);

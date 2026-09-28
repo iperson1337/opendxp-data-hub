@@ -71,7 +71,8 @@ class Block extends Base
     public function getResolver($attribute, $fieldDefinition, $class)
     {
         return function ($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null) use (
-            $fieldDefinition, $attribute
+            $fieldDefinition,
+            $attribute
         ) {
             $originalValue = $value;
             $result = [];

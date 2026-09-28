@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -991,7 +992,7 @@ class Service
                     $descriptorData
                 );
             } else {
-                $blockGetter = 'get'.ucfirst((string) $descriptorData['__blockName']);
+                $blockGetter = 'get' . ucfirst((string) $descriptorData['__blockName']);
                 $isLocalizedField = self::isLocalizedField($container, $fieldDefinition->getName());
                 if ($isLocalizedField) {
                     $blockData = $object->$blockGetter($descriptorData['args']['language'] ?? null);

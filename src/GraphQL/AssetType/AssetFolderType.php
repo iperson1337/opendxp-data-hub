@@ -48,7 +48,6 @@ class AssetFolderType extends FolderType
                 'type' => Type::string(),
                 'args' => [
                     'thumbnail' => ['type' => Type::string()],
-
                 ],
             ],
             'creationDate' => Type::int(),

@@ -16,22 +16,22 @@
 namespace OpenDxp\Bundle\DataHubBundle\Controller;
 
 use Exception;
+use GraphQL\Error\ClientAware;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Error\Warning;
-use GraphQL\Error\ClientAware;
-use GraphQL\Validator\Rules\QueryComplexity;
-use GraphQL\Validator\Rules\QueryDepth;
-use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use GraphQL\GraphQL;
 use GraphQL\Server\RequestError;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\DisableIntrospection;
+use GraphQL\Validator\Rules\QueryComplexity;
+use GraphQL\Validator\Rules\QueryDepth;
 use OpenDxp;
 use OpenDxp\Bundle\DataHubBundle\Configuration;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\ExecutorEvents;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ExecutorEvent;
 use OpenDxp\Bundle\DataHubBundle\Event\GraphQL\Model\ExecutorResultEvent;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\ClassTypeDefinitions;
+use OpenDxp\Bundle\DataHubBundle\GraphQL\Limits;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Mutation\MutationType;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Query\QueryType;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;

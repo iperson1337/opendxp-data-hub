@@ -257,7 +257,6 @@ class DataObjectFieldHelper extends AbstractFieldHelper
                         'processor' => function ($object, $newValue, $args) {
                             $object->setKey($newValue);
                         },
-
                     ],
                     'published' => [
                         'key' => $key,

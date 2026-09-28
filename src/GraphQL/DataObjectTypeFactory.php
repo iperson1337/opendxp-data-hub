@@ -40,14 +40,15 @@ class DataObjectTypeFactory
     {
         if (!isset(self::$registry[$className])) {
             $class = ClassDefinition::getByName($className);
-            
+
             // Check if class definition exists to prevent getId() errors
             if (!$class) {
                 // Log warning and return null instead of throwing exception
                 error_log("Warning: Class definition with name '{$className}' does not exist, skipping");
+
                 return null;
             }
-            
+
             $operatorImpl = new $this->className(
                 $this->getGraphQlService(),
                 $className,
