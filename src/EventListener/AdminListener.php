@@ -31,6 +31,13 @@ class AdminListener
         $event->addSetting('data-hub-writeable', (new \OpenDxp\Bundle\DataHubBundle\Configuration(null, null))->isWriteable());
         $this->addEventSetting('allow_introspection', $event);
         $this->addEventSetting('allow_sqlObjectCondition', $event);
+
+        $runningExecutions = $this->config['running_executions'] ?? [];
+        $event->addSetting('data-hub-running-executions', [
+            'enabled' => $runningExecutions['enabled'] ?? true,
+            'activePollInterval' => ($runningExecutions['active_poll_interval'] ?? 10) * 1000,
+            'idlePollInterval' => ($runningExecutions['idle_poll_interval'] ?? 30) * 1000,
+        ]);
     }
 
     private function addEventSetting(

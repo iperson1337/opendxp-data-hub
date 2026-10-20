@@ -17,12 +17,15 @@ namespace OpenDxp\Bundle\DataHubBundle\DependencyInjection;
 
 use OpenDxp\Bundle\CoreBundle\DependencyInjection\ConfigurationHelper;
 use OpenDxp\Bundle\DataHubBundle\Configuration\Dao;
+use OpenDxp\Bundle\DataHubBundle\Execution\RunningExecutionProviderInterface;
+use OpenDxp\Bundle\DataHubBundle\Execution\RunningExecutionRegistry;
 use Override;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 
 class OpenDxpDataHubExtension extends Extension implements PrependExtensionInterface
 {
@@ -44,6 +47,15 @@ class OpenDxpDataHubExtension extends Extension implements PrependExtensionInter
         );
 
         $loader->load('config.yml');
+
+        $container->registerForAutoconfiguration(RunningExecutionProviderInterface::class)
+            ->addTag(RunningExecutionProviderInterface::TAG);
+
+        $runningExecutions = $config['running_executions'];
+        $container->getDefinition(RunningExecutionRegistry::class)
+            ->setArgument('$cache', new Reference($runningExecutions['cache_pool']))
+            ->setArgument('$enabled', $runningExecutions['enabled'])
+            ->setArgument('$cacheTtl', $runningExecutions['cache_ttl']);
     }
 
     public function prepend(ContainerBuilder $container)

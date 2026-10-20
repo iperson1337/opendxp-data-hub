@@ -62,6 +62,7 @@ class Configuration implements ConfigurationInterface
 
         $this->addConfigurationsNode($rootNode);
         $this->addSupportedTypes($rootNode);
+        $this->addRunningExecutionsNode($rootNode);
 
         /** @var ArrayNodeDefinition $rootNode */
         ConfigurationHelper::addConfigLocationWithWriteTargetNodes(
@@ -79,6 +80,24 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('configurations')
                     ->normalizeKeys(false)
                     ->variablePrototype()->end()
+                ->end()
+            ->end();
+    }
+
+    private function addRunningExecutionsNode(ArrayNodeDefinition $rootNode): void
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('running_executions')
+                    ->info('Индикатор «Идёт выполнение» под деревом конфигов (RunningExecutionProviderInterface)')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')->info('false — индикатор не показывается и не опрашивает сервер')->defaultTrue()->end()
+                        ->integerNode('cache_ttl')->info('Сколько секунд сводка поставщиков живёт в кеше, 0 — без кеша')->defaultValue(5)->min(0)->end()
+                        ->scalarNode('cache_pool')->info('Пул кеша для сводки; общий для подов пул (Redis) даёт один опрос поставщиков на весь кластер')->defaultValue('cache.app')->cannotBeEmpty()->end()
+                        ->integerNode('active_poll_interval')->info('Интервал опроса вкладкой, пока что-то выполняется, в секундах')->defaultValue(10)->min(1)->end()
+                        ->integerNode('idle_poll_interval')->info('Интервал опроса вкладкой, когда ничего не выполняется, в секундах')->defaultValue(30)->min(1)->end()
+                    ->end()
                 ->end()
             ->end();
     }

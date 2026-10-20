@@ -22,6 +22,7 @@ use OpenDxp\Bundle\DataHubBundle\ConfigEvents;
 use OpenDxp\Bundle\DataHubBundle\Configuration;
 use OpenDxp\Bundle\DataHubBundle\Event\AdminEvents;
 use OpenDxp\Bundle\DataHubBundle\Event\Config\SpecialEntitiesEvent;
+use OpenDxp\Bundle\DataHubBundle\Execution\RunningExecutionRegistry;
 use OpenDxp\Bundle\DataHubBundle\GraphQL\Service;
 use OpenDxp\Bundle\DataHubBundle\Installer;
 use OpenDxp\Bundle\DataHubBundle\Model\SpecialEntitySetting;
@@ -129,6 +130,27 @@ class ConfigController extends \OpenDxp\Controller\UserAwareController
         usort($tree, $sortFunc);
 
         return $this->json($tree);
+    }
+
+    /**
+     * Выполняющиеся сейчас конфиги для индикатора под деревом. Опрашивается открытой вкладкой
+     * Data Hub, поэтому отдаёт кешированную сводку {@see RunningExecutionRegistry}, а не ходит
+     * к поставщикам на каждый запрос.
+     */
+    #[Route('/running-executions', methods: ['GET'])]
+    public function runningExecutionsAction(RunningExecutionRegistry $registry): JsonResponse
+    {
+        $this->checkPermission(self::CONFIG_NAME);
+
+        $items = [];
+        foreach ($registry->getRunningExecutions() as $execution) {
+            $configuration = Configuration::getByName($execution->configName);
+            if ($configuration && $configuration->isAllowed('read')) {
+                $items[] = $execution->toArray();
+            }
+        }
+
+        return $this->json(['items' => $items]);
     }
 
     /**

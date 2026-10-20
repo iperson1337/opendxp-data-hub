@@ -31,6 +31,7 @@ The basic configuration of Datahub comes with a GraphQL API, which is described 
 - [Basic principle](./doc/02_Basic_Principle.md) for configuring an endpoint
 - [GraphQL](./doc/10_GraphQL/README.md) [*default and recommended endpoint*]
 - [Configuration & Deployment](./doc/20_Deployment.md)
+- [Running executions indicator](./doc/25_Running_Executions.md) (прогресс адаптеров под деревом конфигов)
 - [Testing](./doc/30_Testing.md)
 
 ***

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0] - 2026-10-20
+
+### Добавлено
+- Индикатор «Идёт выполнение» под деревом конфигов: по прогресс-бару на каждый выполняющийся
+  конфиг (клик открывает конфиг), иконка загрузки и процент у узла в дереве. Прогресс отдают
+  бандлы адаптеров через `RunningExecutionProviderInterface` (тег
+  `opendxp.datahub.running_execution_provider` ставит autoconfigure). Подключение
+  необязательно. Эндпоинт `GET /admin/opendxpdatahub/config/running-executions` отдаёт сводку,
+  кешированную на `cache_ttl` секунд для всех пользователей, и отфильтрованную по праву `read`
+  на конфиг. Вкладка опрашивает его, только пока она активна и окно браузера видно, и после
+  каждого опроса бросает на `document` событие `opendxp.datahub.runningExecutions`.
+  Настройки — `opendxp_data_hub.running_executions` (`enabled`, `cache_ttl`, `cache_pool`,
+  `active_poll_interval`, `idle_poll_interval`). Документация: `doc/25_Running_Executions.md`.
+
 ## [1.1.2] - 2026-09-28
 
 ### Добавлено

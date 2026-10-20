@@ -7,3 +7,16 @@
 .plugin_opendxp_datahub_status {
     background: url(/bundles/opendxpadmin/img/icon/cog_go.png) no-repeat !important;
 }
+
+.plugin_opendxp_datahub_running_executions {
+    border-top: 1px solid #d0d0d0 !important;
+}
+
+.plugin_opendxp_datahub_running_execution {
+    cursor: pointer;
+}
+
+.plugin_opendxp_datahub_running_execution_percent {
+    color: #888;
+    font-size: 11px;
+}
