@@ -353,12 +353,9 @@ opendxp.plugin.datahub.config = Class.create({
 
     openRunningConfiguration: function (name) {
         const record = this.tree.getStore().getNodeById(name);
-        if (!record) {
-            return;
+        if (record) {
+            this.openConfigurationOnce(record);
         }
-
-        const adapterImpl = new opendxp.plugin.datahub.adapter[record.data.adapter](this);
-        adapterImpl.openConfiguration(record.id);
     },
 
     getEditPanel: function () {
@@ -366,6 +363,13 @@ opendxp.plugin.datahub.config = Class.create({
             this.editPanel = new Ext.TabPanel({
                 region: "center"
             });
+
+            this.editPanel.on("add", function (panel, component) {
+                const prefix = "plugin_opendxp_datahub_configpanel_panel_";
+                if (this.openingConfigurations && component.id.indexOf(prefix) === 0) {
+                    delete this.openingConfigurations[component.id.substring(prefix.length)];
+                }
+            }, this);
         }
 
         return this.editPanel;
@@ -377,9 +381,35 @@ opendxp.plugin.datahub.config = Class.create({
             return;
         }
 
-        let adapterType = record.data.adapter;
-        let adapterImpl = new opendxp.plugin.datahub.adapter[adapterType](this);
-        adapterImpl.openConfiguration(record.id);
+        this.openConfigurationOnce(record);
+    },
+
+    /**
+     * Адаптер ищет уже открытую панель конфига, но создаёт её только после ответа сервера:
+     * второй клик до ответа (двойной клик по узлу или бару) дал бы
+     * «Duplicate component id plugin_opendxp_datahub_configpanel_panel_<name>».
+     */
+    openConfigurationOnce: function (record) {
+        const name = record.id;
+        const existingPanel = Ext.getCmp("plugin_opendxp_datahub_configpanel_panel_" + name);
+        if (existingPanel) {
+            this.getEditPanel().setActiveTab(existingPanel);
+            return;
+        }
+
+        this.openingConfigurations = this.openingConfigurations || {};
+        if (this.openingConfigurations[name]) {
+            return;
+        }
+        this.openingConfigurations[name] = true;
+
+        // Снимается, когда панель добавлена (getEditPanel), или по таймеру, если запрос упал.
+        setTimeout(function () {
+            delete this.openingConfigurations[name];
+        }.bind(this), 15000);
+
+        const adapterImpl = new opendxp.plugin.datahub.adapter[record.data.adapter](this);
+        adapterImpl.openConfiguration(name);
     },
 
 
