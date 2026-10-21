@@ -102,6 +102,24 @@ class HelperFilterTest extends TestCase
         $this->build('{"$and": ["1=1) OR (1=1"]}');
     }
 
+    /**
+     * Путь листинга: карта полей заводится в addJoins() по ссылке. Необъявленная переменная
+     * вызывающего (null) не должна доходить до buildInCondition(array) — раньше это был
+     * TypeError на любом `$in`.
+     */
+    public function testInConditionAfterAddJoinsWithUndefinedMappingTable(): void
+    {
+        $filter = json_decode('{"code": {"$in": [754, 42591]}}', false, 512, JSON_THROW_ON_ERROR);
+        $list = null;
+        $mappingTable = null;
+
+        Helper::addJoins($list, $filter, [], $mappingTable);
+        $sql = Helper::buildSqlCondition('objects', $filter, null, null, $mappingTable);
+
+        self::assertSame([], $mappingTable);
+        self::assertStringContainsString("(`objects`.`code` IN ('754', '42591'))", $sql);
+    }
+
     public function testScalarListForFieldBecomesInCondition(): void
     {
         $sql = $this->build('{"name": ["a", "b) OR (1=1"]}');

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.2] - 2026-10-21
+
+### Исправлено
+- Любой фильтр листинга с `$in` (`{"code": {"$in": [...]}}`) падал «Internal server error»
+  (`Helper::buildInCondition(): Argument #4 ($fieldMappingTable) must be of type array, null
+  given`). `QueryType` передавал в `Helper::addJoins()` по ссылке необъявленную карту полей, она
+  приходила `null` и доходила до типизированного `buildInCondition(array)`, появившегося в 1.1.0
+  вместе с закрытием SQL-инъекций. Карта теперь заводится пустой, а `addJoins()` сам приводит
+  `null` к `[]`. Ответ с ошибкой приходил с HTTP 200, поэтому в логах сервера его не видно.
+
 ## [1.2.1] - 2026-10-20
 
 ### Исправлено

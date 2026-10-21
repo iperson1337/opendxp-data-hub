@@ -51,6 +51,10 @@ class Helper
      */
     public static function addJoins(&$list, $filter, $columns, &$mappingTable = [])
     {
+        // Карта уходит дальше в buildSqlCondition() → buildInCondition(array): необъявленная
+        // переменная вызывающего приходит сюда null и роняла любой фильтр `$in` TypeError'ом.
+        $mappingTable ??= [];
+
         $filterKeys = self::collectFilterKeys($filter);
         if ($filterKeys === []) {
             return;

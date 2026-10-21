@@ -556,6 +556,7 @@ class QueryType
             $className = $this->class->getName();
             $columns = $this->configuration->configuration['schema']['queryEntities'][$className]['columnConfig']['columns'] ?? [];
 
+            $mappingTable = [];
             Helper::addJoins($objectList, $filter, $columns, $mappingTable);
 
             $filterCondition = Helper::buildSqlCondition($tableName, $filter, null, null, $mappingTable);
