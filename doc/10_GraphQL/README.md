@@ -89,8 +89,13 @@ opendxp_data_hub:
     graphql:
         output_cache_enabled: true    # Enables/disables the output (responses) cache
         output_cache_lifetime: 20     # If enabled, for how many seconds each response will be cached
+        output_cache_max_size: 5242880 # Responses larger than this many bytes are not cached, 0 = no limit
 ```
 By default the cache is disabled but if it is enabled and you don't specify a value for `output_cache_lifetime`, its default value is set to 30 seconds.
+
+Responses larger than `output_cache_max_size` (default 5 MB) are not put into the cache. Saving a response
+needs two more full copies of it in memory (decoding and serialization), so caching a huge listing page
+can exhaust `memory_limit` after the response itself has already been built.
 
 ### Disable Output Cache for a Single Request (Only in DEBUG MODE)
 Just add the parameter `?opendxp_outputfilters_disabled=true` to the URL. This works in a similar way as the [OpenDxp's Full Page Cache](https://docs.opendxp.io/docs/core-framework/Development_Documentation/Development_Tools_and_Details/Cache/Full_Page_Cache.html).

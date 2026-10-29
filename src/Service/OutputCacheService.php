@@ -42,6 +42,11 @@ class OutputCacheService
     private $lifetime = 30;
 
     /**
+     * Ответы длиннее (в байтах) в кэш не кладутся, 0 — без ограничения
+     */
+    private int $maxSize = 5242880;
+
+    /**
      * @var EventDispatcherInterface
      */
     public $eventDispatcher;
@@ -58,6 +63,10 @@ class OutputCacheService
 
             if (isset($dataHubConfig['graphql']['output_cache_lifetime'])) {
                 $this->lifetime = intval($dataHubConfig['graphql']['output_cache_lifetime']);
+            }
+
+            if (isset($dataHubConfig['graphql']['output_cache_max_size'])) {
+                $this->maxSize = max(0, intval($dataHubConfig['graphql']['output_cache_max_size']));
             }
         }
     }
@@ -190,6 +199,10 @@ class OutputCacheService
 
     /**
      * Ответы с ошибками (в том числе транзиентными) в кэш не попадают.
+     *
+     * Слишком большие — тоже, и проверка длины идёт до json_decode: разбор ответа и его
+     * сериализация при записи в кэш — ещё две полные копии в памяти. На ответе ~100 МБ
+     * это фатал memory_limit уже после того, как ответ собран.
      */
     private function isCacheableResponse(JsonResponse $response): bool
     {
@@ -197,7 +210,12 @@ class OutputCacheService
             return false;
         }
 
-        $payload = json_decode((string) $response->getContent(), true);
+        $content = (string) $response->getContent();
+        if ($this->maxSize > 0 && strlen($content) > $this->maxSize) {
+            return false;
+        }
+
+        $payload = json_decode($content, true);
 
         return is_array($payload) && empty($payload['errors']);
     }

@@ -38,6 +38,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('not_allowed_policy')->info('throw exception = 1, return null = 2')->defaultValue(2)->end()
                         ->booleanNode('output_cache_enabled')->info('enables output cache for graphql responses. It is disabled by default')->defaultValue(false)->end()
                         ->integerNode('output_cache_lifetime')->info('output cache in seconds. Default is 30 seconds')->defaultValue(30)->end()
+                        ->integerNode('output_cache_max_size')->info('responses larger than this many bytes are not put into the output cache, 0 disables the limit. Default is 5 MB')->defaultValue(5242880)->min(0)->end()
                         ->booleanNode('allow_introspection')->info('enables introspection for graphql. It is enabled by default')->defaultValue(true)->end()
                         ->booleanNode('allow_sqlObjectCondition')
                             ->setDeprecated(
