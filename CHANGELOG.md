@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.3.0] - 2026-11-07
+
+### Добавлено
+- Типы данных ядра OpenDXP, у которых не было генератора Data Hub. Колонка такого типа молча
+  выпадала из схемы, без ошибки. Значение отдаётся в форме объекта ядра:
+  - `numericRange` → `NumericRange { minimum maximum }` (`NumericRange::toArray()`), запись — `NumericRangeInput`;
+  - `quantityValueRange` → `QuantityValueRange { minimum maximum unit toString }`, запись —
+    `QuantityValueRangeInput` (`unitId` или `unit`, как у `QuantityValueInput`);
+  - `dateRange` → `DateRange { start end }` (даты в том же виде, что у поля `date`), запись —
+    `DateRangeInput` (timestamp или строка, как у мутации `date`);
+  - `geopolyline` → список `Geopoint`, как `geopolygon`;
+  - `consent` → `Consent { consent noteId }`;
+  - `user` → `String` (id пользователя), запись строкой.
+- Не поддерживаются намеренно: `password` (хеш пароля наружу не отдаётся), `encryptedField`
+  (расшифрованное значение наружу — отдельное решение), `localizedfields`/`objectbricks` —
+  контейнеры, их поля отдаются своими генераторами.
+
 ## [1.2.3] - 2026-10-29
 
 ### Исправлено
