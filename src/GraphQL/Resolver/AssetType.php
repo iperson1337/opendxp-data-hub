@@ -170,6 +170,26 @@ class AssetType
      * @param ElementDescriptor|null $value
      * @param array $args
      * @param array $context
+     */
+    public function resolveUrl($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null): ?string
+    {
+        return $this->getAssetFromValue($value, $context)?->getFrontendFullPath();
+    }
+
+    /**
+     * @param ElementDescriptor|null $value
+     * @param array $args
+     * @param array $context
+     */
+    public function resolveChecksum($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null): ?string
+    {
+        return $this->getAssetFromValue($value, $context)?->getChecksum();
+    }
+
+    /**
+     * @param ElementDescriptor|null $value
+     * @param array $args
+     * @param array $context
      *
      * @return string|null
      *
