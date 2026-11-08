@@ -18,7 +18,7 @@ use OpenDxp\Bundle\DataHubBundle\GraphQL\Resolver\AssetType;
 use PHPUnit\Framework\TestCase;
 
 /**
- * `url` и `checksum` ассета берутся из ядра (Asset::getFrontendFullPath(), Asset::getChecksum());
+ * `url` (без кодирования по умолчанию, encoded: true — Asset::getFrontendFullPath()) и `checksum` ассета;
  * без ассета в значении — null, а не ошибка.
  */
 class AssetUrlChecksumTest extends TestCase
@@ -32,6 +32,15 @@ class AssetUrlChecksumTest extends TestCase
         $resolver = (new \ReflectionClass(AssetType::class))->newInstanceWithoutConstructor();
 
         self::assertNull($resolver->resolveUrl(null));
+        self::assertNull($resolver->resolveUrl(null, ['encoded' => true]));
         self::assertNull($resolver->resolveChecksum(null));
+    }
+
+    public function testUnencodedUrlKeepsPathAsIs(): void
+    {
+        self::assertSame(
+            'https://minio.example/bucket/assets/Товары/фото 1.jpg',
+            AssetType::buildUnencodedUrl('https://minio.example/bucket/assets', '/Товары/фото 1.jpg'),
+        );
     }
 }

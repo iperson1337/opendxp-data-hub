@@ -163,10 +163,14 @@ class AssetType extends ObjectType
                 ],
                 'resolve' => $resolver->resolveSrcSet(...),
             ],
-            // Абсолютная ссылка на оригинал — Asset::getFrontendFullPath() ядра:
-            // opendxp.assets.frontend_prefixes.source + путь. fullpath остаётся относительным.
+            // Абсолютная ссылка на оригинал: opendxp.assets.frontend_prefixes.source + путь.
+            // По умолчанию путь не кодируется; encoded: true — Asset::getFrontendFullPath() ядра
+            // (путь url-кодирован). fullpath остаётся относительным.
             'url' => [
                 'type' => Type::string(),
+                'args' => [
+                    'encoded' => ['type' => Type::boolean(), 'defaultValue' => false],
+                ],
                 'resolve' => $resolver->resolveUrl(...),
             ],
             'checksum' => [

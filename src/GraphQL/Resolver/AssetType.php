@@ -173,7 +173,27 @@ class AssetType
      */
     public function resolveUrl($value = null, $args = [], $context = [], ?ResolveInfo $resolveInfo = null): ?string
     {
-        return $this->getAssetFromValue($value, $context)?->getFrontendFullPath();
+        $asset = $this->getAssetFromValue($value, $context);
+        if (!$asset instanceof Asset) {
+            return null;
+        }
+
+        if (($args['encoded'] ?? false) === true) {
+            return $asset->getFrontendFullPath();
+        }
+
+        $prefix = (string) (OpenDxp\Config::getSystemConfiguration('assets')['frontend_prefixes']['source'] ?? '');
+
+        return self::buildUnencodedUrl($prefix, $asset->getRealFullPath());
+    }
+
+    /**
+     * Ссылка без url-кодирования пути: префикс source + путь как есть (пробелы, кириллица
+     * не кодируются). Так ссылку собирают клиенты, которые кодируют её у себя.
+     */
+    public static function buildUnencodedUrl(string $prefix, string $path): string
+    {
+        return $prefix . $path;
     }
 
     /**
