@@ -165,7 +165,8 @@ class AssetType extends ObjectType
             ],
             // Абсолютная ссылка на оригинал: opendxp.assets.frontend_prefixes.source + путь.
             // По умолчанию путь не кодируется; encoded: true — Asset::getFrontendFullPath() ядра
-            // (путь url-кодирован). fullpath остаётся относительным.
+            // (путь url-кодирован). fullpath вне админки — тоже ссылка ядра: Asset::getFullPath()
+            // во фронтенд-контексте возвращает getFrontendFullPath().
             'url' => [
                 'type' => Type::string(),
                 'args' => [
